@@ -2,5 +2,5 @@
 /**
  * Index.php surves no purpose
  *
- * @package deodar
+ * @package Deodar
  */

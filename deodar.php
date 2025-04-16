@@ -2,7 +2,7 @@
 /**
  * Entry point to the Deodar Plugin
  *
- * @package           deodar
+ * @package           Deodar
  * @author            Brock Cataldi
  * @copyright         2025 Brock Cataldi
  * @license           GPL-2.0-or-later
@@ -26,14 +26,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if( ! defined('DEODAR_PATH' ) ){
-    define('DEODAR_PATH', trailingslashit(plugin_dir_path(__FILE__)));
+if ( ! defined( 'DEODAR_PATH' ) ) {
+	define( 'DEODAR_PATH', plugin_dir_path( __FILE__ ) );
 }
 
-if( ! defined('DEODAR_LIB_PATH' ) ) {
-    define('DEODAR_LIB_PATH', trailingslashit(DEODAR_PATH . 'lib'));
+if ( ! defined( 'DEODAR_LIB_PATH' ) ) {
+	define( 'DEODAR_LIB_PATH', path_join( DEODAR_PATH, 'lib' ) );
 }
 
-require DEODAR_LIB_PATH . 'class-deodar.php';
+if ( ! defined( 'DEODAR_FUNCTIONS_PATH' ) ) {
+	define( 'DEODAR_FUNCTIONS_PATH', path_join( DEODAR_LIB_PATH, 'functions' ) );
+}
 
-(new Deodar())->bind();
+if ( ! defined( 'DEODAR_MODELS_PATH' ) ) {
+	define( 'DEODAR_MODELS_PATH', path_join( DEODAR_LIB_PATH, 'models' ) );
+}
+
+require DEODAR_LIB_PATH . '/deodar-functions.php';
+require DEODAR_LIB_PATH . '/deodar-models.php';
+require DEODAR_LIB_PATH . '/class-deodar.php';
+
+( new Deodar() )->bind();
