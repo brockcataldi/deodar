@@ -1,6 +1,6 @@
 <?php
 /**
- * Base class for Deodar Source
+ * Function file for _deodar_get_directories
  *
  * @package           Deodar
  * @author            Brock Cataldi
@@ -18,9 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Will return empty array even if the path doesn't exist.
  *
  * @since 2.0.0
- *
  * @param string $path The path to search.
- *
  * @return string[]
  */
 function _deodar_get_directories( string $path ): array {

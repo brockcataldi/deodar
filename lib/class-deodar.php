@@ -16,8 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Base class for Deodar
  */
 class Deodar {
-
-
 	/**
 	 *  All of the registered source paths.
 	 *
