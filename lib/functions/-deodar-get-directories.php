@@ -23,24 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function _deodar_get_directories( string $path ): array {
 
-	$paths = array();
-
 	if ( false === is_dir( $path ) ) {
 		return array();
 	}
 
-	foreach ( new DirectoryIterator( $path ) as $entry ) {
-		if ( $entry->isDot() ) {
+	$paths    = array();
+	$iterator = new DirectoryIterator( $path );
+
+	foreach ( $iterator as $entry ) {
+		if ( true === $entry->isDot() || false === $entry->isDir() ) {
 			continue;
 		}
 
-		$entry_path = path_join( $path, $entry->getFileName() );
-
-		if ( false === is_dir( $entry_path ) ) {
-			continue;
-		}
-
-		$paths[] = $entry_path;
+		$paths[] = path_join( $path, $entry->getFileName() );
 	}
 
 	return $paths;

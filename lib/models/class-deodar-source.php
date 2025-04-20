@@ -95,17 +95,11 @@ class Deodar_Source {
 	 * @return string[]
 	 */
 	private function get_acf_blocks_paths() {
-		if ( false === is_null( $this->acf_blocks_paths ) ) {
+		if ( true === isset( $this->acf_blocks_paths ) ) {
 			return $this->acf_blocks_paths;
 		}
 
-		$blocks_dir_path = path_join( $this->path, 'blocks' );
-		if ( false === is_dir( $blocks_dir_path ) ) {
-			$this->acf_blocks_paths = array();
-			return $this->acf_blocks_paths;
-		}
-
-		$acf_blocks_dir_path = path_join( $blocks_dir_path, 'acf' );
+		$acf_blocks_dir_path = path_join( $this->path, 'blocks/acf' );
 		if ( false === is_dir( $acf_blocks_dir_path ) ) {
 			$this->acf_blocks_paths = array();
 			return $this->acf_blocks_paths;
@@ -148,14 +142,16 @@ class Deodar_Source {
 	 * @return void
 	 */
 	private function register_block_field_groups() {
+
+		if ( false === function_exists( 'acf_add_local_field_group' ) ) {
+			return;
+		}
+
 		foreach ( $this->get_acf_blocks_paths() as $acf_block ) {
-			if ( false === function_exists( 'acf_add_local_field_group' ) ) {
-				continue;
-			}
 
 			$block_json_path = path_join( $acf_block, 'block.json' );
 
-			if ( false === is_file( $block_json_path ) ) {
+			if ( false === is_readable( $block_json_path ) ) {
 				continue;
 			}
 
@@ -164,31 +160,16 @@ class Deodar_Source {
 				array( 'associative' => true )
 			);
 
-			if ( false === array_key_exists( 'name', $block_json ) ) {
+			if ( false === isset( $block_json['name'], $block_json['acf']['group']['fields'] ) || true === empty( $block_json['acf']['group']['fields'] ) ) {
 				continue;
 			}
 
-			if ( false === array_key_exists( 'acf', $block_json ) ) {
-				continue;
-			}
-
-			if ( false === array_key_exists( 'group', $block_json['acf'] ) ) {
-				continue;
-			}
-
-			if ( false === array_key_exists( 'fields', $block_json['acf']['group'] ) ) {
-				continue;
-			}
-
-			$group = $block_json['acf']['group'];
-
-			if ( false === array_key_exists( 'fields', $group ) || 0 === count( $group['fields'] ) ) {
-				continue;
-			}
+			$block_name = $block_json['name'];
+			$group      = $block_json['acf']['group'];
 
 			$group['fields'] = _deodar_format_fields(
 				$block_json['acf']['group']['fields'],
-				sprintf( 'block_%s', $block_json['name'] )
+				sprintf( 'block_%s', $block_name )
 			);
 
 			$group['location'] = array(
@@ -196,13 +177,13 @@ class Deodar_Source {
 					array(
 						'param'    => 'block',
 						'operator' => '==',
-						'value'    => $block_json['name'],
+						'value'    => $block_name,
 					),
 				),
 			);
 
-			if ( false === array_key_exists( 'key', $group ) ) {
-				$group['key'] = sprintf( 'group_block_%s', $block_json['name'] );
+			if ( false === isset( $group['key'] ) ) {
+				$group['key'] = sprintf( 'group_block_%s', $block_name );
 			}
 
 			acf_add_local_field_group( $group );

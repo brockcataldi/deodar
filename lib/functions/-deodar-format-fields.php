@@ -34,19 +34,20 @@ function _deodar_format_fields( array $fields, string $id, int $depth = 0 ): arr
 	}
 
 	$results = array();
+	$prefix  = str_repeat( 'sub_', $depth );
 
 	foreach ( $fields as $field ) {
 
-		if ( false === array_key_exists( 'key', $field ) ) {
+		if ( false === isset( $field['key'] ) ) {
 			$field['key'] = sprintf(
 				'%sfield_%s_%s',
-				str_repeat( 'sub_', $depth ),
+				$prefix,
 				$id,
 				$field['name']
 			);
 		}
 
-		if ( true === array_key_exists( 'sub_fields', $field ) ) {
+		if ( true === isset( $field['sub_fields'] ) ) {
 			$field['sub_fields'] = _deodar_format_fields(
 				$field['sub_fields'],
 				$id,
