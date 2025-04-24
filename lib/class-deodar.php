@@ -45,10 +45,10 @@ class Deodar {
 	 * Meant to bind to the `after_setup_theme` hook.
 	 */
 	public function after_setup_theme() {
-		$source_paths = apply_filters( 'deodar', array() );
+		$sources_data = apply_filters( 'deodar', array() );
 
-		foreach ( $source_paths as $source_path ) {
-			$source = new Deodar_Source( $source_path );
+		foreach ( $sources_data as $source_data ) {
+			$source = new Deodar_Source( $source_data );
 			$source->bind();
 			$this->sources[] = $source;
 		}

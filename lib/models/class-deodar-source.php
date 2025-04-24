@@ -23,30 +23,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Deodar_Source {
 
 	/**
-	 * The location of the source.
+	 * The file path location of the source.
 	 *
 	 * @since 2.0.0
-	 * @var string $path The source path.
+	 * @var string $base_path The source path.
 	 */
-	public string $path;
+	public string $base_path;
 
 	/**
-	 * The Cached ACF block paths
+	 * The url location of the source.
+	 *
+	 * @since 2.0.0
+	 * @var string $base_url The source path.
+	 */
+	public string $base_url;
+
+	/**
+	 * The styles bound to the the source.
+	 *
+	 * @since 2.0.0
+	 * @var Deodar_Style[] $styles The source styles.
+	 */
+	public array $styles;
+
+	/**
+	 * The cached ACF block paths.
 	 *
 	 * @since 2.0.0
 	 * @var null|string[] $acf_blocks_paths The paths of the ACF blocks.
 	 */
-	public null|array $acf_blocks_paths = null;
+	private null|array $acf_blocks_paths = null;
 
 	/**
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
-	 * @param string $path The path of the source.
+	 * @param array $data The url and path of the source.
 	 * @return void
 	 */
-	public function __construct( string $path ) {
-		$this->path = $path;
+	public function __construct( array $data ) {
+		[$path, $url] = $data;
+		$this->parse( $path, $url );
 	}
 
 	/**
@@ -60,6 +77,7 @@ class Deodar_Source {
 	public function bind() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'acf/init', array( $this, 'acf_init' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 	}
 
 	/**
@@ -87,6 +105,56 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Wp_enqueue_scripts function.
+	 *
+	 * Called at the `wp_enqueue_scripts` hook.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public function wp_enqueue_scripts() {
+		foreach ( $this->styles as $style ) {
+			$style->enqueue( $this->base_url );
+		}
+	}
+
+	/**
+	 * The parse function.
+	 *
+	 * Loading and parsing the deodar.json file and source data.
+	 *
+	 * @since 2.0.0
+	 * @param string $path The root source path.
+	 * @param string $url The root source url.
+	 * @return void
+	 */
+	private function parse( string $path, string $url ) {
+		$this->base_path = $path;
+		$this->base_url  = $url;
+
+		$deodar_json_path = path_join( $this->base_path, 'deodar.json' );
+
+		if ( false === is_readable( $deodar_json_path ) ) {
+			return;
+		}
+
+		$deodar_json = wp_json_file_decode(
+			$deodar_json_path,
+			array( 'associative' => true )
+		);
+
+		$this->styles = array();
+
+		if ( true === isset( $deodar_json['styles'] ) ) {
+			if ( true === is_array( $deodar_json['styles'] ) && true === array_is_list( $deodar_json['styles'] ) ) {
+				foreach ( $deodar_json['styles'] as $style ) {
+					$this->styles[] = new Deodar_Style( $style );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Get_acf_blocks_paths function.
 	 *
 	 * Returns all of the directories in the root/blocks/acf path.
@@ -99,7 +167,7 @@ class Deodar_Source {
 			return $this->acf_blocks_paths;
 		}
 
-		$acf_blocks_dir_path = path_join( $this->path, 'blocks/acf' );
+		$acf_blocks_dir_path = path_join( $this->base_path, 'blocks/acf' );
 		if ( false === is_dir( $acf_blocks_dir_path ) ) {
 			$this->acf_blocks_paths = array();
 			return $this->acf_blocks_paths;

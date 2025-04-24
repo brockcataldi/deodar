@@ -15,3 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( false === class_exists( 'Deodar_Source' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-source.php';
 }
+
+if ( false === class_exists( 'Deodar_Style' ) ) {
+	require DEODAR_MODELS_PATH . '/class-deodar-style.php';
+}

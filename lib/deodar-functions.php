@@ -19,3 +19,7 @@ if ( false === function_exists( '_deodar_format_fields' ) ) {
 if ( false === function_exists( '_deodar_get_directories' ) ) {
 	require DEODAR_FUNCTIONS_PATH . '/-deodar-get-directories.php';
 }
+
+if ( false === function_exists( '_deodar_get_template_name' ) ) {
+	require DEODAR_FUNCTIONS_PATH . '/-deodar-get-template-name.php';
+}
