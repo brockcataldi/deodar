@@ -12,6 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( false === function_exists( '_deodar_array_type' ) ) {
+	require DEODAR_FUNCTIONS_PATH . '/-deodar-array-type.php';
+}
+
 if ( false === function_exists( '_deodar_format_fields' ) ) {
 	require DEODAR_FUNCTIONS_PATH . '/-deodar-format-fields.php';
 }

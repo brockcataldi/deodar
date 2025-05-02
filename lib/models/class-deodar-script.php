@@ -1,6 +1,6 @@
 <?php
 /**
- * Base class for Deodar Style
+ * Base class for Deodar Script
  *
  * @package           Deodar
  * @author            Brock Cataldi
@@ -13,78 +13,80 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The class for Deodar Style
+ * The class for Deodar Script
  *
- * The utility for loading stylesheets.
+ * The utility for loading JavaScript files.
  *
  * @since 2.0.0
  */
-class Deodar_Style {
+class Deodar_Script {
 
 	/**
-	 * The handle (name) of the stylesheet.
+	 * The handle (name) of the script.
 	 *
 	 * @since 2.0.0
-	 * @var string $handle The source path.
+	 * @var string $handle The script's handle.
 	 */
 	private string|null $handle = null;
 
 	/**
-	 * The url of the stylesheet.
+	 * The url of the script.
 	 *
 	 * @since 2.0.0
-	 * @var string|null $url The stylesheet's url.
+	 * @var string|null $url The script's url.
 	 */
 	private string|null $url = null;
 
 	/**
-	 * The file path of the stylesheet.
+	 * The file path of the script.
 	 *
 	 * @since 2.0.0
-	 * @var string|null $file The stylesheet's file path.
+	 * @var string|null $file The script's file path.
 	 */
 	private string|null $file = null;
 
 	/**
-	 * The dependencies of the stylesheet.
+	 * The dependencies of the script.
 	 *
 	 * @since 2.0.0
-	 * @var array $dependencies The stylesheet's dependencies.
+	 * @var array $dependencies The script's dependencies.
 	 */
 	private array $dependencies = array();
 
 	/**
-	 * The version number of the stylesheet.
+	 * The version number of the script.
 	 *
 	 * @since 2.0.0
-	 * @var string|bool|null $version The stylesheet's version.
+	 * @var string|bool|null $version The script's version.
 	 */
-	private string|bool|null $version = null;
+	private string|bool|null $version = false;
 
 	/**
-	 * The media attribute of the stylesheet.
+	 * Arguments for the script.
+	 *
+	 * Can be a boolean for 'in_footer' or an array of arguments.
 	 *
 	 * @since 2.0.0
-	 * @var string $media The stylesheet's version.
+	 * @var array|bool $args The script's arguments.
 	 */
-	private string $media = '';
+	private array|bool $args = false;
 
 	/**
-	 * The template(s) the stylesheet will load against.
+	 * The template(s) the script will load against.
 	 *
 	 * If null, it will always load
 	 *
 	 * @since 2.0.0
-	 * @var string|array|null $template The stylesheet's templates.
+	 * @var string|array|null $template The script's templates.
 	 */
 	private string|array|null $template = null;
 
 	/**
-	 * Deodar Style constructor.
+	 * Deodar Script constructor.
 	 *
 	 * @since 2.0.0
-	 * @param array $data The style data.
-	 * @throws InvalidArgumentException Only if the style object is invalid.
+	 * @param array $data The script data.
+	 * @throws InvalidArgumentException Only if the script object is invalid.
 	 * @return void
 	 */
 	public function __construct( array $data ) {
@@ -128,38 +130,38 @@ class Deodar_Style {
 		}
 
 		if ( true === isset( $data['version'] ) ) {
-			if ( false === string( $data['version'] ) && false === is_bool( $data['version'] ) ) {
-				throw new InvalidArgumentException( '"version" must be an string, boolean or removed.' );
+			if ( false === is_string( $data['version'] ) && false === is_bool( $data['version'] ) && false === is_null( $data['version'] ) ) {
+				throw new InvalidArgumentException( '"version" must be a string, boolean (false), null, or removed.' );
 			}
 			$this->version = $data['version'];
 		}
 
-		if ( true === isset( $data['media'] ) ) {
-			if ( false === is_string( $data['media'] ) ) {
-				throw new InvalidArgumentException( '"media" must be a string or removed.' );
+		if ( true === isset( $data['args'] ) ) {
+			if ( false === is_array( $data['args'] ) && false === is_bool( $data['args'] ) ) {
+				throw new InvalidArgumentException( '"args" must be an array, boolean, or removed.' );
 			}
-			$this->media = $data['media'];
+			$this->args = $data['args'];
 		}
 
 		if ( true === isset( $data['template'] ) ) {
-			if ( false === is_string( $data['template'] ) && false === is_array( $data['template'] ) ) {
-				throw new InvalidArgumentException( '"template" must be a string, array, or removed.' );
+			if ( false === is_string( $data['template'] ) && false === is_array( $data['template'] ) && false === is_null( $data['template'] ) ) {
+				throw new InvalidArgumentException( '"template" must be a string, array, null, or removed.' );
 			}
 			$this->template = $data['template'];
 		}
 	}
 
 	/**
-	 * Enqueue the style to the theme.
+	 * Enqueue the script to the theme.
 	 *
-	 * If file isset and url isn't then we'll need the
+	 * If file is set and url isn't then we'll need the
 	 * $url_root to actually enqueue the file.
 	 *
 	 * @since 2.0.0
-	 * @param string $url_root The base source url.
+	 * @param string $url_root The base source url. Required if 'file' is used instead of 'url'.
 	 * @return void
 	 */
-	public function enqueue( string $url_root ) {
+	public function enqueue( string $url_root = '' ): void {
 
 		$source = $this->url;
 
@@ -182,12 +184,12 @@ class Deodar_Style {
 		}
 
 		if ( ! empty( $this->handle ) && ! empty( $source ) ) {
-			wp_enqueue_style(
+			wp_enqueue_script(
 				$this->handle,
 				$source,
 				$this->dependencies,
 				$this->version,
-				$this->media
+				$this->args
 			);
 		}
 	}

@@ -90,6 +90,7 @@ class Deodar_Source {
 	 */
 	public function init() {
 		$this->register_blocks();
+
 	}
 
 	/**
@@ -145,9 +146,9 @@ class Deodar_Source {
 
 		$this->styles = array();
 
-		if ( true === isset( $deodar_json['styles'] ) ) {
-			if ( true === is_array( $deodar_json['styles'] ) && true === array_is_list( $deodar_json['styles'] ) ) {
-				foreach ( $deodar_json['styles'] as $style ) {
+		if ( true === _deodar_array_type( $deodar_json['styles'] ) ) {
+			foreach ( $deodar_json['styles'] as $style ) {
+				if ( false === _deodar_array_type( $style ) ) {
 					$this->styles[] = new Deodar_Style( $style );
 				}
 			}
