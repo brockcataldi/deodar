@@ -4,12 +4,3 @@
  *
  * @package Deodar
  */
-
- /**
-  * Post Types
-  * Taxonomies
-  * Menus
-  * Field Groups
-  * 
-  * Block Variations?
-  */

@@ -80,6 +80,22 @@ class Deodar_Style {
 	private string|array|null $template = null;
 
 	/**
+	 * Whether or not the style needs to be loaded on the frontend
+	 *
+	 * @since 2.0.0
+	 * @var bool $front Should the file loaded on the frontend.
+	 */
+	private bool $front = true;
+
+	/**
+	 * Whether or not the style needs to be loaded on the backend
+	 *
+	 * @since 2.0.0
+	 * @var bool $template Should the file be loaded on the backend.
+	 */
+	private bool $back = false;
+
+	/**
 	 * Deodar Style constructor.
 	 *
 	 * @since 2.0.0
@@ -147,6 +163,20 @@ class Deodar_Style {
 			}
 			$this->template = $data['template'];
 		}
+
+		if ( true === isset( $data['front'] ) ) {
+			if ( false === is_bool( $data['front'] ) ) {
+				throw new InvalidArgumentException( '"front" must be a bool or removed.' );
+			}
+			$this->front = $data['front'];
+		}
+
+		if ( true === isset( $data['back'] ) ) {
+			if ( false === is_bool( $data['back'] ) ) {
+				throw new InvalidArgumentException( '"back" must be a bool or removed.' );
+			}
+			$this->back = $data['back'];
+		}
 	}
 
 	/**
@@ -157,9 +187,18 @@ class Deodar_Style {
 	 *
 	 * @since 2.0.0
 	 * @param string $url_root The base source url.
+	 * @param bool   $end Which end is being loaded, front is true, back is false.
 	 * @return void
 	 */
-	public function enqueue( string $url_root ) {
+	public function enqueue( string $url_root, bool $end ) {
+
+		if ( true === $end && false === $this->front ) {
+			return;
+		}
+
+		if ( false === $end && false === $this->back ) {
+			return;
+		}
 
 		$source = $this->url;
 

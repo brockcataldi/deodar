@@ -44,7 +44,7 @@ class Deodar_Source {
 	 * @since 2.0.0
 	 * @var Deodar_Style[] $styles The source styles.
 	 */
-	public array $styles;
+	public array $styles = array();
 
 	/**
 	 * The cached ACF block paths.
@@ -78,6 +78,7 @@ class Deodar_Source {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'acf/init', array( $this, 'acf_init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 	}
 
 	/**
@@ -90,7 +91,6 @@ class Deodar_Source {
 	 */
 	public function init() {
 		$this->register_blocks();
-
 	}
 
 	/**
@@ -106,6 +106,20 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Admin_enqueue_scripts function.
+	 *
+	 * Called at the `admin_enqueue_scripts` hook.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public function admin_enqueue_scripts() {
+		foreach ( $this->styles as $style ) {
+			$style->enqueue( $this->base_url, false );
+		}
+	}
+
+	/**
 	 * Wp_enqueue_scripts function.
 	 *
 	 * Called at the `wp_enqueue_scripts` hook.
@@ -115,7 +129,7 @@ class Deodar_Source {
 	 */
 	public function wp_enqueue_scripts() {
 		foreach ( $this->styles as $style ) {
-			$style->enqueue( $this->base_url );
+			$style->enqueue( $this->base_url, true );
 		}
 	}
 
@@ -143,8 +157,6 @@ class Deodar_Source {
 			$deodar_json_path,
 			array( 'associative' => true )
 		);
-
-		$this->styles = array();
 
 		if ( true === _deodar_array_type( $deodar_json['styles'] ) ) {
 			foreach ( $deodar_json['styles'] as $style ) {
