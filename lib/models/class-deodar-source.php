@@ -39,12 +39,28 @@ class Deodar_Source {
 	public string $base_url;
 
 	/**
+	 * The scripts bound to the the source.
+	 *
+	 * @since 2.0.0
+	 * @var Deodar_Script[] $scripts The source scripts.
+	 */
+	public array $scripts = array();
+
+	/**
 	 * The styles bound to the the source.
 	 *
 	 * @since 2.0.0
 	 * @var Deodar_Style[] $styles The source styles.
 	 */
 	public array $styles = array();
+
+	/**
+	 * The theme supports bound to the the source.
+	 *
+	 * @since 2.0.0
+	 * @var Deodar_Support[] $supports The source theme supports.
+	 */
+	public array $supports = array();
 
 	/**
 	 * The cached ACF block paths.
@@ -59,9 +75,14 @@ class Deodar_Source {
 	 *
 	 * @since 2.0.0
 	 * @param array $data The url and path of the source.
+	 * @throws InvalidArgumentException Only if the style object is invalid.
 	 * @return void
 	 */
 	public function __construct( array $data ) {
+		if ( count( $data ) !== 2 || ! is_string( $data[0] ) || ! is_string( $data[1] ) ) {
+			throw new InvalidArgumentException( 'The `$data` array must contain exactly two string elements.' );
+		}
+
 		[$path, $url] = $data;
 		$this->parse( $path, $url );
 	}
@@ -79,6 +100,22 @@ class Deodar_Source {
 		add_action( 'acf/init', array( $this, 'acf_init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+
+		$this->after_setup_theme();
+	}
+
+	/**
+	 * After_setup_theme function.
+	 *
+	 * Called at the `after_setup_theme` hook.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public function after_setup_theme() {
+		foreach ( $this->supports as $support ) {
+			$support->add();
+		}
 	}
 
 	/**
@@ -162,6 +199,22 @@ class Deodar_Source {
 			foreach ( $deodar_json['styles'] as $style ) {
 				if ( false === _deodar_array_type( $style ) ) {
 					$this->styles[] = new Deodar_Style( $style );
+				}
+			}
+		}
+
+		if ( true === _deodar_array_type( $deodar_json['scripts'] ) ) {
+			foreach ( $deodar_json['scripts'] as $script ) {
+				if ( false === _deodar_array_type( $script ) ) {
+					$this->scripts[] = new Deodar_Script( $script );
+				}
+			}
+		}
+
+		if ( true === _deodar_array_type( $deodar_json['supports'] ) ) {
+			foreach ( $deodar_json['supports'] as $support ) {
+				if ( true === is_string( $support ) || false === _deodar_array_type( $support ) ) {
+					$this->supports[] = new Deodar_Support( $support );
 				}
 			}
 		}

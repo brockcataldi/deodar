@@ -34,9 +34,5 @@ function _deodar_array_type( mixed $value ): bool|null {
 		return null;
 	}
 
-	if ( false === array_is_list( $value ) ) {
-		return false;
-	}
-
-	return true;
+	return array_is_list( $value );
 }

@@ -82,6 +82,22 @@ class Deodar_Script {
 	private string|array|null $template = null;
 
 	/**
+	 * Whether or not the style needs to be loaded on the frontend
+	 *
+	 * @since 2.0.0
+	 * @var bool $frontend Should the file loaded on the frontend.
+	 */
+	private bool $frontend = true;
+
+	/**
+	 * Whether or not the style needs to be loaded on the backend
+	 *
+	 * @since 2.0.0
+	 * @var bool $template Should the file be loaded on the backend.
+	 */
+	private bool $backend = false;
+
+	/**
 	 * Deodar Script constructor.
 	 *
 	 * @since 2.0.0
@@ -148,6 +164,20 @@ class Deodar_Script {
 				throw new InvalidArgumentException( '"template" must be a string, array, null, or removed.' );
 			}
 			$this->template = $data['template'];
+		}
+
+		if ( true === isset( $data['frontend'] ) ) {
+			if ( false === is_bool( $data['frontend'] ) ) {
+				throw new InvalidArgumentException( '"frontend" must be a bool or removed.' );
+			}
+			$this->frontend = $data['frontend'];
+		}
+
+		if ( true === isset( $data['backend'] ) ) {
+			if ( false === is_bool( $data['backend'] ) ) {
+				throw new InvalidArgumentException( '"backend" must be a bool or removed.' );
+			}
+			$this->backend = $data['backend'];
 		}
 	}
 

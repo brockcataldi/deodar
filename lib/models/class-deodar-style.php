@@ -83,9 +83,9 @@ class Deodar_Style {
 	 * Whether or not the style needs to be loaded on the frontend
 	 *
 	 * @since 2.0.0
-	 * @var bool $front Should the file loaded on the frontend.
+	 * @var bool $frontend Should the file loaded on the frontend.
 	 */
-	private bool $front = true;
+	private bool $frontend = true;
 
 	/**
 	 * Whether or not the style needs to be loaded on the backend
@@ -93,7 +93,7 @@ class Deodar_Style {
 	 * @since 2.0.0
 	 * @var bool $template Should the file be loaded on the backend.
 	 */
-	private bool $back = false;
+	private bool $backend = false;
 
 	/**
 	 * Deodar Style constructor.
@@ -164,18 +164,18 @@ class Deodar_Style {
 			$this->template = $data['template'];
 		}
 
-		if ( true === isset( $data['front'] ) ) {
-			if ( false === is_bool( $data['front'] ) ) {
-				throw new InvalidArgumentException( '"front" must be a bool or removed.' );
+		if ( true === isset( $data['frontend'] ) ) {
+			if ( false === is_bool( $data['frontend'] ) ) {
+				throw new InvalidArgumentException( '"frontend" must be a bool or removed.' );
 			}
-			$this->front = $data['front'];
+			$this->frontend = $data['frontend'];
 		}
 
-		if ( true === isset( $data['back'] ) ) {
-			if ( false === is_bool( $data['back'] ) ) {
-				throw new InvalidArgumentException( '"back" must be a bool or removed.' );
+		if ( true === isset( $data['backend'] ) ) {
+			if ( false === is_bool( $data['backend'] ) ) {
+				throw new InvalidArgumentException( '"backend" must be a bool or removed.' );
 			}
-			$this->back = $data['back'];
+			$this->backend = $data['backend'];
 		}
 	}
 
@@ -187,16 +187,16 @@ class Deodar_Style {
 	 *
 	 * @since 2.0.0
 	 * @param string $url_root The base source url.
-	 * @param bool   $end Which end is being loaded, front is true, back is false.
+	 * @param bool   $end Which end is being loaded, frontend is true, backend is false.
 	 * @return void
 	 */
 	public function enqueue( string $url_root, bool $end ) {
 
-		if ( true === $end && false === $this->front ) {
+		if ( true === $end && false === $this->frontend ) {
 			return;
 		}
 
-		if ( false === $end && false === $this->back ) {
+		if ( false === $end && false === $this->backend ) {
 			return;
 		}
 
