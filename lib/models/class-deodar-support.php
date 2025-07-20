@@ -72,6 +72,6 @@ class Deodar_Support {
 			add_theme_support( $this->feature );
 		}
 
-		add_theme_support( $this->features, $this->args );
+		add_theme_support( $this->feature, $this->args );
 	}
 }

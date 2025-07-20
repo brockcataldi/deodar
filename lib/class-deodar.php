@@ -17,13 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Deodar {
 	/**
-	 *  All of the registered source paths.
-	 *
-	 *  @var string[] $sources
-	 */
-	private array $sources = array();
-
-	/**
 	 * Deodar constructor.
 	 *
 	 * Meant to be empty
@@ -50,7 +43,6 @@ class Deodar {
 		foreach ( $sources_data as $source_data ) {
 			$source = new Deodar_Source( $source_data );
 			$source->bind();
-			$this->sources[] = $source;
 		}
 	}
 }

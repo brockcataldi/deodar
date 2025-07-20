@@ -1,6 +1,6 @@
 <?php
 /**
- * Base class for Deodar Source
+ * Class file for Deodar Source
  *
  * @package           Deodar
  * @author            Brock Cataldi
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Base class for Deodar Source
+ * The class for Deodar Source
  *
  * A "source" is either a plugin or a theme. Meant to enable mixing of
  * multiple Deodar builds for portability.
@@ -154,6 +154,10 @@ class Deodar_Source {
 		foreach ( $this->styles as $style ) {
 			$style->enqueue( $this->base_url, false );
 		}
+
+		foreach ( $this->scripts as $script ) {
+			$script->enqueue( $this->base_url, false );
+		}
 	}
 
 	/**
@@ -167,6 +171,10 @@ class Deodar_Source {
 	public function wp_enqueue_scripts() {
 		foreach ( $this->styles as $style ) {
 			$style->enqueue( $this->base_url, true );
+		}
+
+		foreach ( $this->scripts as $script ) {
+			$script->enqueue( $this->base_url, true );
 		}
 	}
 
