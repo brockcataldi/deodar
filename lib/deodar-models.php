@@ -12,8 +12,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( false === enum_exists( 'Deodar_Scan_Type' ) ) {
+	require DEODAR_MODELS_PATH . '/enum-deodar-scan-type.php';
+}
+
 if ( false === class_exists( 'Deodar_Enqueuable' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-enqueuable.php';
+}
+
+if ( false === class_exists( 'Deodar_Post_Type' ) ) {
+	require DEODAR_MODELS_PATH . '/class-deodar-post-type.php';
 }
 
 if ( false === class_exists( 'Deodar_Script' ) ) {

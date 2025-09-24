@@ -23,6 +23,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Deodar_Source {
 
 	/**
+	 * The pattern for valid post-type file names.
+	 *
+	 * @since 2.0.0
+	 * @var string PATTERN_POST_TYPE The pattern.
+	 */
+	const PATTERN_POST_TYPE = '/^class-([A-Za-z0-9-]+)\.post-type\.php$/';
+
+	/**
 	 * The file path location of the source.
 	 *
 	 * @since 2.0.0
@@ -71,6 +79,14 @@ class Deodar_Source {
 	private null|array $acf_blocks_paths = null;
 
 	/**
+	 * The cached post types class names.
+	 *
+	 * @since 2.0.0
+	 * @var null|string[] $post_types The names of the included post types.
+	 */
+	private null|array $post_types = null;
+
+	/**
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
@@ -97,7 +113,7 @@ class Deodar_Source {
 	 */
 	public function bind() {
 		add_action( 'init', array( $this, 'init' ) );
-		add_action( 'acf/init', array( $this, 'acf_init' ) );
+		add_action( 'acf/include_fields', array( $this, 'acf_include_fields' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
@@ -128,6 +144,7 @@ class Deodar_Source {
 	 */
 	public function init() {
 		$this->register_blocks();
+		$this->register_post_types();
 	}
 
 	/**
@@ -138,7 +155,7 @@ class Deodar_Source {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function acf_init() {
+	public function acf_include_fields() {
 		$this->register_block_field_groups();
 	}
 
@@ -182,6 +199,11 @@ class Deodar_Source {
 	 * The parse function.
 	 *
 	 * Loading and parsing the deodar.json file and source data.
+	 *
+	 * TODO: I think it'd be better to just pass all config in functions.php,
+	 * because it'll be better for performance.
+	 *
+	 * No Read -> Parse -> Parse -> Action
 	 *
 	 * @since 2.0.0
 	 * @param string $path The root source path.
@@ -247,7 +269,7 @@ class Deodar_Source {
 			return $this->acf_blocks_paths;
 		}
 
-		$acf_blocks       = _deodar_get_directories( $acf_blocks_dir_path );
+		$acf_blocks       = _deodar_scan_for_directories( $acf_blocks_dir_path );
 		$acf_blocks_paths = array();
 
 		foreach ( $acf_blocks as $acf_block ) {
@@ -256,6 +278,46 @@ class Deodar_Source {
 
 		$this->acf_blocks_paths = $acf_blocks_paths;
 		return $this->acf_blocks_paths;
+	}
+
+	/**
+	 * Get_post_types function.
+	 *
+	 * Loads and returns all of the static classnames in an array, meant for post types.
+	 *
+	 * @since 2.0.0
+	 * @return array The loaded post types.
+	 */
+	private function get_post_types() {
+		if ( true === isset( $this->post_types ) ) {
+			return $this->post_types;
+		}
+
+		$post_types_dir_path = path_join( $this->base_path, 'includes/post-types' );
+
+		if ( false === is_dir( $post_types_dir_path ) ) {
+			$this->post_types_paths = array();
+			return $this->post_types;
+		}
+
+		$post_types        = _deodar_scan_for_files( $post_types_dir_path );
+		$post_types_loaded = array();
+
+		foreach ( $post_types as [$post_type_name, $post_type_path] ) {
+
+			if ( preg_match( self::PATTERN_POST_TYPE, $post_type_name, $matches ) ) {
+				include $post_type_path;
+
+				$class_name = _deodar_classify( $matches[1] ) . '_Post_Type';
+
+				if ( class_exists( $post_type ) ) {
+					$post_types_loaded[] = $class_name;
+				}
+			}
+		}
+
+		$this->post_types = $post_types_loaded;
+		return $this->post_types;
 	}
 
 	/**
@@ -330,5 +392,28 @@ class Deodar_Source {
 
 			acf_add_local_field_group( $group );
 		}
+	}
+
+	/**
+	 * Registers the post types.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	private function register_post_types() {
+		foreach ( $this->get_post_types() as $post_type ) {
+			if ( method_exists( $class, 'register' ) ) {
+				$post_type::register();
+			}
+		}
+	}
+
+	/**
+	 * Registers the post_type field groups.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	private function register_post_type_field_groups() {
 	}
 }
