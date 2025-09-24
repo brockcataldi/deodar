@@ -25,6 +25,7 @@ abstract class Deodar_Post_Type {
 	/**
 	 * The name of the post type.
 	 *
+	 * @since 2.0.0
 	 * @var string $type the slug or name of the post type.
 	 */
 	public static string $type = '';
@@ -32,6 +33,7 @@ abstract class Deodar_Post_Type {
 	/**
 	 * The field group set for the specific post type.
 	 *
+	 * @since 2.0.0
 	 * @var string $group the acf field group.
 	 */
 	public static array $group = array();
@@ -39,18 +41,22 @@ abstract class Deodar_Post_Type {
 	/**
 	 * The arguments for the post type.
 	 *
+	 * @since 2.0.0
 	 * @return array The arguments for the post type.
 	 */
 	abstract public static function arguments(): array;
 
 	/**
 	 * Register's the post type
+	 *
+	 * @since 2.0.0
+	 * @return void
 	 */
 	public static function register() {
-		if ( '' !== self::$type ) {
+		if ( '' !== static::$type ) {
 			register_post_type(
-				self::$type,
-				self::arguments()
+				static::$type,
+				static::arguments()
 			);
 		}
 	}

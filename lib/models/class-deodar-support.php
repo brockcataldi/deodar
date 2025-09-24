@@ -50,7 +50,7 @@ class Deodar_Support {
 			$this->feature = $data;
 		}
 
-		if ( false === _deodar_array_type( $data ) ) {
+		if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $data ) ) {
 			if ( true === isset( $data['feature'] ) ) {
 				$this->feature = $data['feature'];
 			}

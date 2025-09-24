@@ -1,6 +1,6 @@
 <?php
 /**
- * Deodar_Scan_Type Enum.
+ * File for Deodar_Scan_Type.
  *
  * @package           Deodar
  * @author            Brock Cataldi

@@ -23,19 +23,16 @@ if ( false === function_exists( '_deodar_array_type' ) ) {
 	 *
 	 * @since 2.0.0
 	 * @param mixed $value The value to be checked.
-	 * @return bool|null The result of the process.
+	 * @return Deodar_Array_Type The result of the process.
 	 */
-	function _deodar_array_type( mixed $value ): bool|null {
-
-		if ( false === isset( $value ) ) {
-			return null;
-		}
-
+	function _deodar_array_type( mixed $value ): Deodar_Array_Type {
 		if ( false === is_array( $value ) ) {
-			return null;
+			return Deodar_Array_Type::NEITHER;
 		}
 
-		return array_is_list( $value );
+		return array_is_list( $value ) ?
+			Deodar_Array_Type::SEQUENTIAL :
+			Deodar_Array_Type::ASSOCIATIVE;
 	}
 }
 
@@ -113,11 +110,14 @@ if ( false === function_exists( '_deodar_scan_for_directories' ) ) {
 	 * Will return empty array even if the path doesn't exist.
 	 *
 	 * @since 2.0.0
-	 * @param string           $path The path to search.
+	 * @param string           $path The path to search (defaults to PATHS).
 	 * @param Deodar_Scan_Type $type The expected return value.
 	 * @return string|array[]
 	 */
-	function _deodar_scan_for_directories( string $path, Deodar_Scan_Type $type = Deodar_Scan_Type::PATHS ): array {
+	function _deodar_scan_for_directories(
+		string $path,
+		Deodar_Scan_Type $type = Deodar_Scan_Type::PATHS
+	): array {
 
 		if ( false === is_dir( $path ) ) {
 			return array();
@@ -131,7 +131,7 @@ if ( false === function_exists( '_deodar_scan_for_directories' ) ) {
 				continue;
 			}
 
-			$paths[] = $type::resolve( $entry->getFileName(), $path );
+			$paths[] = $type->resolve( $entry->getFileName(), $path );
 		}
 
 		return $paths;
@@ -146,11 +146,15 @@ if ( false === function_exists( '_deodar_scan_for_files' ) ) {
 	 *
 	 * @since 2.0.0
 	 * @param string           $path The path to search.
-	 * @param Deodar_Scan_Type $type The expected return value.
+	 * @param Deodar_Scan_Type $type The expected return value (defaults to BOTH).
 	 * @param bool             $include_index Whether or not to include index.php (defaults to false).
 	 * @return string|array[]
 	 */
-	function _deodar_scan_for_files( string $path, Deodar_Scan_Type $type = Deodar_Scan_Type::BOTH, bool $include_index = false ): array {
+	function _deodar_scan_for_files(
+		string $path,
+		Deodar_Scan_Type $type = Deodar_Scan_Type::BOTH,
+		bool $include_index = false
+	): array {
 
 		if ( false === is_dir( $path ) ) {
 			return array();
@@ -170,7 +174,7 @@ if ( false === function_exists( '_deodar_scan_for_files' ) ) {
 				continue;
 			}
 
-			$paths[] = $type::resolve( $file_name, $path );
+			$paths[] = $type->resolve( $file_name, $path );
 		}
 
 		return $paths;

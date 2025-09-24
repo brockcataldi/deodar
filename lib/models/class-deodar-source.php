@@ -36,7 +36,7 @@ class Deodar_Source {
 	 * @since 2.0.0
 	 * @var string $base_path The source path.
 	 */
-	public string $base_path;
+	public string $base_path = '';
 
 	/**
 	 * The url location of the source.
@@ -44,7 +44,7 @@ class Deodar_Source {
 	 * @since 2.0.0
 	 * @var string $base_url The source path.
 	 */
-	public string $base_url;
+	public string $base_url = '';
 
 	/**
 	 * The scripts bound to the the source.
@@ -90,17 +90,43 @@ class Deodar_Source {
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
-	 * @param array $data The url and path of the source.
-	 * @throws InvalidArgumentException Only if the style object is invalid.
+	 * @param array $data Deodar config array.
+	 * @throws InvalidArgumentException Only throws when the ['path'] and ['url'] aren't set.
 	 * @return void
 	 */
 	public function __construct( array $data ) {
-		if ( count( $data ) !== 2 || ! is_string( $data[0] ) || ! is_string( $data[1] ) ) {
-			throw new InvalidArgumentException( 'The `$data` array must contain exactly two string elements.' );
+
+		if ( empty( $data['path'] ) || empty( $data['url'] ) ) {
+			throw new InvalidArgumentException(
+				'Deodar source requires both "path" and "url".'
+			);
+		}
+		$this->base_path = $data['path'];
+		$this->base_url  = $data['url'];
+
+		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['styles'] ) ) {
+			foreach ( $data['styles'] as $style ) {
+				if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $style ) ) {
+					$this->styles[] = new Deodar_Style( $style );
+				}
+			}
 		}
 
-		[$path, $url] = $data;
-		$this->parse( $path, $url );
+		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['scripts'] ) ) {
+			foreach ( $data['scripts'] as $script ) {
+				if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $script ) ) {
+					$this->scripts[] = new Deodar_Script( $script );
+				}
+			}
+		}
+
+		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['supports'] ) ) {
+			foreach ( $data['supports'] as $support ) {
+				if ( true === is_string( $support ) || Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $support ) ) {
+					$this->supports[] = new Deodar_Support( $support );
+				}
+			}
+		}
 	}
 
 	/**
@@ -196,61 +222,6 @@ class Deodar_Source {
 	}
 
 	/**
-	 * The parse function.
-	 *
-	 * Loading and parsing the deodar.json file and source data.
-	 *
-	 * TODO: I think it'd be better to just pass all config in functions.php,
-	 * because it'll be better for performance.
-	 *
-	 * No Read -> Parse -> Parse -> Action
-	 *
-	 * @since 2.0.0
-	 * @param string $path The root source path.
-	 * @param string $url The root source url.
-	 * @return void
-	 */
-	private function parse( string $path, string $url ) {
-		$this->base_path = $path;
-		$this->base_url  = $url;
-
-		$deodar_json_path = path_join( $this->base_path, 'deodar.json' );
-
-		if ( false === is_readable( $deodar_json_path ) ) {
-			return;
-		}
-
-		$deodar_json = wp_json_file_decode(
-			$deodar_json_path,
-			array( 'associative' => true )
-		);
-
-		if ( true === _deodar_array_type( $deodar_json['styles'] ) ) {
-			foreach ( $deodar_json['styles'] as $style ) {
-				if ( false === _deodar_array_type( $style ) ) {
-					$this->styles[] = new Deodar_Style( $style );
-				}
-			}
-		}
-
-		if ( true === _deodar_array_type( $deodar_json['scripts'] ) ) {
-			foreach ( $deodar_json['scripts'] as $script ) {
-				if ( false === _deodar_array_type( $script ) ) {
-					$this->scripts[] = new Deodar_Script( $script );
-				}
-			}
-		}
-
-		if ( true === _deodar_array_type( $deodar_json['supports'] ) ) {
-			foreach ( $deodar_json['supports'] as $support ) {
-				if ( true === is_string( $support ) || false === _deodar_array_type( $support ) ) {
-					$this->supports[] = new Deodar_Support( $support );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Get_acf_blocks_paths function.
 	 *
 	 * Returns all of the directories in the root/blocks/acf path.
@@ -310,7 +281,7 @@ class Deodar_Source {
 
 				$class_name = _deodar_classify( $matches[1] ) . '_Post_Type';
 
-				if ( class_exists( $post_type ) ) {
+				if ( class_exists( $class_name ) ) {
 					$post_types_loaded[] = $class_name;
 				}
 			}
@@ -402,7 +373,7 @@ class Deodar_Source {
 	 */
 	private function register_post_types() {
 		foreach ( $this->get_post_types() as $post_type ) {
-			if ( method_exists( $class, 'register' ) ) {
+			if ( method_exists( $post_type, 'register' ) ) {
 				$post_type::register();
 			}
 		}
