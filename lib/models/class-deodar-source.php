@@ -23,14 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Deodar_Source {
 
 	/**
-	 * The pattern for valid post-type file names.
-	 *
-	 * @since 2.0.0
-	 * @var string PATTERN_POST_TYPE The pattern.
-	 */
-	const PATTERN_POST_TYPE = '/^class-([A-Za-z0-9-]+)\.post-type\.php$/';
-
-	/**
 	 * The file path location of the source.
 	 *
 	 * @since 2.0.0
@@ -87,6 +79,14 @@ class Deodar_Source {
 	private null|array $post_types = null;
 
 	/**
+	 * The cached includes
+	 *
+	 * @since 2.0.0
+	 * @var array[] $includes the cache of get include
+	 */
+	private array $includes = array();
+
+	/**
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
@@ -104,29 +104,31 @@ class Deodar_Source {
 		$this->base_path = $data['path'];
 		$this->base_url  = $data['url'];
 
-		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['styles'] ) ) {
-			foreach ( $data['styles'] as $style ) {
-				if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $style ) ) {
-					$this->styles[] = new Deodar_Style( $style );
-				}
+		$this->styles   = $this->hydrate( $data['styles'], 'Deodar_Style' );
+		$this->scripts  = $this->hydrate( $data['scripts'], 'Deodar_Script' );
+		$this->supports = $this->hydrate( $data['supports'], 'Deodar_Support' );
+	}
+
+	/**
+	 * Hydrate function.
+	 *
+	 * Hydrate the config data, into actual usable data.
+	 *
+	 * @since 2.0.0
+	 * @param array  $items the config data to hydrate.
+	 * @param string $class_name the class to hydrate the data to.
+	 * @return array The hydrated data.
+	 */
+	private function hydrate( array $items, string $class_name ): array {
+		$objects = array();
+
+		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $items ) ) {
+			foreach ( $items as $item ) {
+				$objects[] = new $class_name( $item );
 			}
 		}
 
-		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['scripts'] ) ) {
-			foreach ( $data['scripts'] as $script ) {
-				if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $script ) ) {
-					$this->scripts[] = new Deodar_Script( $script );
-				}
-			}
-		}
-
-		if ( Deodar_Array_Type::SEQUENTIAL === _deodar_array_type( $data['supports'] ) ) {
-			foreach ( $data['supports'] as $support ) {
-				if ( true === is_string( $support ) || Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $support ) ) {
-					$this->supports[] = new Deodar_Support( $support );
-				}
-			}
-		}
+		return $objects;
 	}
 
 	/**
@@ -170,7 +172,18 @@ class Deodar_Source {
 	 */
 	public function init() {
 		$this->register_blocks();
-		$this->register_post_types();
+
+		foreach ( $this->get_post_types() as $post_type ) {
+			if ( method_exists( $post_type, 'register' ) ) {
+				$post_type->register();
+			}
+		}
+
+		foreach ( $this->get_taxonomies() as $taxonomy ) {
+			if ( method_exists( $taxonomy, 'register' ) ) {
+				$taxonomy->register();
+			}
+		}
 	}
 
 	/**
@@ -182,8 +195,25 @@ class Deodar_Source {
 	 * @return void
 	 */
 	public function acf_include_fields() {
+		if ( false === function_exists( 'acf_add_local_field_group' ) ) {
+			return;
+		}
+
 		$this->register_block_field_groups();
+
+		foreach ( $this->get_post_types() as $post_type ) {
+			if ( method_exists( $post_type, 'add' ) ) {
+				$post_type->add();
+			}
+		}
+
+		foreach ( $this->get_taxonomies() as $taxonomy ) {
+			if ( method_exists( $taxonomy, 'add' ) ) {
+				$taxonomy->add();
+			}
+		}
 	}
+
 
 	/**
 	 * Admin_enqueue_scripts function.
@@ -252,43 +282,77 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Get_includes function
+	 *
+	 * Loads and caches classes within the includes folder.
+	 *
+	 * @param string $type The type and folder of the includes.
+	 * @param string $pattern The file regex to match against.
+	 * @param string $suffix The end of the classname that's enforced.
+	 */
+	private function get_includes( string $type, string $pattern, string $suffix ) {
+		if ( true === isset( $this->includes[ $type ] ) ) {
+			return $this->includes[ $type ];
+		}
+
+		$includes_dir_path = path_join( $this->base_path, path_join( 'includes', $type ) );
+
+		if ( false === is_dir( $includes_dir_path ) ) {
+			$this->includes[ $type ] = array();
+			return $this->includes[ $type ];
+		}
+
+		$includes = _deodar_scan_for_files( $includes_dir_path );
+		$loaded   = array();
+
+		foreach ( $includes as [$name, $path] ) {
+
+			if ( preg_match( $pattern, $name, $matches ) ) {
+				include $path;
+
+				$class_name = _deodar_classify( $matches[1] ) . $suffix;
+
+				if ( class_exists( $class_name ) ) {
+					$loaded[] = new $class_name();
+				}
+			}
+		}
+
+		$this->includes[ $type ] = $loaded;
+		return $this->includes[ $type ];
+	}
+
+	/**
 	 * Get_post_types function.
 	 *
-	 * Loads and returns all of the static classnames in an array, meant for post types.
+	 * Loads and returns all of the Post Type classes in an array.
 	 *
 	 * @since 2.0.0
 	 * @return array The loaded post types.
 	 */
 	private function get_post_types() {
-		if ( true === isset( $this->post_types ) ) {
-			return $this->post_types;
-		}
+		return $this->get_includes(
+			'post-types',
+			'/^class-([A-Za-z0-9-]+)\.post-type\.php$/',
+			'_Post_Type'
+		);
+	}
 
-		$post_types_dir_path = path_join( $this->base_path, 'includes/post-types' );
 
-		if ( false === is_dir( $post_types_dir_path ) ) {
-			$this->post_types_paths = array();
-			return $this->post_types;
-		}
-
-		$post_types        = _deodar_scan_for_files( $post_types_dir_path );
-		$post_types_loaded = array();
-
-		foreach ( $post_types as [$post_type_name, $post_type_path] ) {
-
-			if ( preg_match( self::PATTERN_POST_TYPE, $post_type_name, $matches ) ) {
-				include $post_type_path;
-
-				$class_name = _deodar_classify( $matches[1] ) . '_Post_Type';
-
-				if ( class_exists( $class_name ) ) {
-					$post_types_loaded[] = $class_name;
-				}
-			}
-		}
-
-		$this->post_types = $post_types_loaded;
-		return $this->post_types;
+	/**
+	 * Get_taxonomies function.
+	 *
+	 * Loads and returns all of the Taxonomy classes in an array.
+	 *
+	 * @since 2.0.0
+	 * @return array The loaded post types.
+	 */
+	private function get_taxonomies() {
+		return $this->get_includes(
+			'taxonomies',
+			'/^class-([A-Za-z0-9-]+)\.taxonomy\.php$/',
+			'_Taxonomy'
+		);
 	}
 
 	/**
@@ -317,11 +381,6 @@ class Deodar_Source {
 	 * @return void
 	 */
 	private function register_block_field_groups() {
-
-		if ( false === function_exists( 'acf_add_local_field_group' ) ) {
-			return;
-		}
-
 		foreach ( $this->get_acf_blocks_paths() as $acf_block ) {
 
 			$block_json_path = path_join( $acf_block, 'block.json' );
@@ -335,56 +394,21 @@ class Deodar_Source {
 				array( 'associative' => true )
 			);
 
-			if ( false === isset( $block_json['name'], $block_json['acf']['group']['fields'] ) || true === empty( $block_json['acf']['group']['fields'] ) ) {
-				continue;
-			}
-
-			$block_name = $block_json['name'];
-			$group      = $block_json['acf']['group'];
-
-			$group['fields'] = _deodar_format_fields(
-				$block_json['acf']['group']['fields'],
-				sprintf( 'block_%s', $block_name )
-			);
-
-			$group['location'] = array(
+			$group = _deodar_format_group(
+				$block_json['acf']['group'],
+				'block',
+				$block_json['name'],
+				$block_json['title'],
 				array(
-					array(
-						'param'    => 'block',
-						'operator' => '==',
-						'value'    => $block_name,
-					),
-				),
+					'param'    => 'block',
+					'operator' => '==',
+					'value'    => $block_json['name'],
+				)
 			);
 
-			if ( false === isset( $group['key'] ) ) {
-				$group['key'] = sprintf( 'group_block_%s', $block_name );
-			}
-
-			acf_add_local_field_group( $group );
-		}
-	}
-
-	/**
-	 * Registers the post types.
-	 *
-	 * @since 2.0.0
-	 * @return void
-	 */
-	private function register_post_types() {
-		foreach ( $this->get_post_types() as $post_type ) {
-			if ( method_exists( $post_type, 'register' ) ) {
-				$post_type::register();
+			if ( false === is_null( $group ) ) {
+				acf_add_local_field_group( $group );
 			}
 		}
-	}
-
-	/**
-	 * Registers the post_type field groups.
-	 *
-	 * @since 2.0.0
-	 * @return void
-	 */
-	private function register_post_type_field_groups() {
 	}
 }

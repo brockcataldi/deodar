@@ -28,6 +28,10 @@ if ( false === class_exists( 'Deodar_Post_Type' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-post-type.php';
 }
 
+if ( false === class_exists( 'Deodar_Taxonomy' ) ) {
+	require DEODAR_MODELS_PATH . '/class-deodar-taxonomy.php';
+}
+
 if ( false === class_exists( 'Deodar_Support' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-support.php';
 }

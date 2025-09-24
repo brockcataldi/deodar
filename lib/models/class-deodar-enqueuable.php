@@ -96,6 +96,10 @@ abstract class Deodar_Enqueuable {
 	 */
 	public function __construct( array $data ) {
 
+		if ( Deodar_Array_Type::ASSOCIATIVE !== _deodar_array_type( $data ) ) {
+			throw new InvalidArgumentException( '"$data" must be an associative array.' );
+		}
+
 		if ( true === isset( $data['handle'] ) ) {
 			if ( false === is_string( $data['handle'] ) ) {
 				throw new InvalidArgumentException( '"handle" must be a string.' );

@@ -102,6 +102,51 @@ if ( false === function_exists( '_deodar_format_fields' ) ) {
 	}
 }
 
+if ( false === function_exists( '_deodar_format_group' ) ) {
+	/**
+	 * Formatting an entire ACF Group
+	 *
+	 * @param array  $group The group to format.
+	 * @param string $prefix The prefix to the key, ie "block" or "post_type".
+	 * @param string $slug The lowercase name of the block.
+	 * @param string $title The title of the group.
+	 * @param array  $location The location information of the group.
+	 *
+	 * @return array|null The result of the format, null if invalid.
+	 */
+	function _deodar_format_group(
+		array $group,
+		string $prefix,
+		string $slug,
+		string $title,
+		array $location
+	): array|null {
+
+		if ( false === isset( $group['fields'] ) || true === empty( $group['fields'] ) ) {
+			return null;
+		}
+
+		$group['fields'] = _deodar_format_fields(
+			$group['fields'],
+			sprintf( '%s_%s', $prefix, $slug )
+		);
+
+		$group['location'] = array(
+			array( $location ),
+		);
+
+		if ( false === isset( $group['key'] ) ) {
+			$group['key'] = sprintf( 'group_%s_%s', $prefix, $slug );
+		}
+
+		if ( false === isset( $group['title'] ) ) {
+			$group['title'] = $title;
+		}
+
+		return $group;
+	}
+}
+
 if ( false === function_exists( '_deodar_scan_for_directories' ) ) {
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class file for Deodar Post Type
+ * Class file for Deodar Taxonomy
  *
  * @package           Deodar
  * @author            Brock Cataldi
@@ -13,63 +13,72 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The class for Deodar Post Type
+ * The class for Deodar Taxonomy
  *
  * @package           Deodar
  * @author            Brock Cataldi
  * @copyright         2025 Brock Cataldi
  * @license           GPL-2.0-or-later
  */
-abstract class Deodar_Post_Type {
+abstract class Deodar_Taxonomy {
 
 	/**
-	 * The name of the post type.
+	 * The name of the taxonomy.
 	 *
 	 * @since 2.0.0
-	 * @var string $type the slug or name of the post type.
+	 * @var string $taxon the slug or name of the taxonomy.
 	 */
-	public string $type = '';
+	public string $taxon = '';
 
 	/**
-	 * The field group set for the specific post type.
+	 * The post types of the taxonomy.
 	 *
 	 * @since 2.0.0
-	 * @var string $group the acf field group.
+	 * @var array $post_types the post types utilizing the taxonomy.
+	 */
+	public array $post_types = array();
+
+	/**
+	 * The field group set for the specific taxonomy.
+	 *
+	 * @since 2.0.0
+	 * @var string $group The acf field group.
 	 */
 	public array $group = array();
 
 	/**
-	 * The arguments for the post type.
+	 * The arguments for the taxonomy.
 	 *
 	 * @since 2.0.0
-	 * @return array The arguments for the post type.
+	 * @return array The arguments for the taxonomy.
 	 */
 	abstract public function arguments(): array;
 
 	/**
-	 * Register's the post type
+	 * Register's the taxonomy
 	 *
 	 * @since 2.0.0
 	 * @return void
 	 */
 	public function register() {
-		if ( '' !== $this->type ) {
-			register_post_type(
-				$this->type,
+		if ( '' !== $this->taxon ) {
+			register_taxonomy(
+				$this->taxon,
+				$this->post_types,
 				$this->arguments()
 			);
 		}
 	}
 
 	/**
-	 * Add's the ACF Field Group to the Post Type
+	 * Add's the ACF Field Group to the taxonomy
 	 *
 	 * @since 2.0.0
 	 * @return void
 	 */
 	public function add() {
 
-		if ( '' === $this->type ) {
+		if ( '' === $this->taxon ) {
 			return;
 		}
 
@@ -78,13 +87,13 @@ abstract class Deodar_Post_Type {
 
 		$group = _deodar_format_group(
 			$this->group,
-			'post_type',
-			$this->type,
+			'taxonomy',
+			$this->taxon,
 			$title,
 			array(
-				'param'    => 'post_type',
+				'param'    => 'taxonomy',
 				'operator' => '==',
-				'value'    => $this->type,
+				'value'    => $this->taxon,
 			)
 		);
 

@@ -48,17 +48,31 @@ class Deodar_Support {
 
 		if ( true === is_string( $data ) ) {
 			$this->feature = $data;
+			return;
 		}
 
 		if ( Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $data ) ) {
-			if ( true === isset( $data['feature'] ) ) {
-				$this->feature = $data['feature'];
+			if ( false === isset( $data['feature'] ) || false === is_string( $data['feature'] ) ) {
+				throw new InvalidArgumentException(
+					'Support configuration array must contain a "feature" string.'
+				);
 			}
 
-			if ( true === isset( $data['args'] ) ) {
-				$this->args = $data['args'];
-			}
+			$this->feature = $data['feature'];
+			$this->args    = $data['args'];
+
+			// if (!is_array($this->args)) {
+			// throw new InvalidArgumentException(
+			// '"args" must be an array if provided in support configuration.'
+			// );
+			// }
+
+			return;
 		}
+
+		throw new InvalidArgumentException(
+			'Support data must be either a string or an associative array with "feature".'
+		);
 	}
 
 	/**
