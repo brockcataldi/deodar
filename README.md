@@ -18,3 +18,8 @@ vendor/bin/phpcs --ignore=./vendor/ . --standard=WordPress
 ```bash
 vendor/bin/phpcbf --ignore=./vendor/ . --standard=WordPress
 ```
+
+### Packaging 
+```bash
+composer archive --format=zip --file=deodar --dir=./build
+```
