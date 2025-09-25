@@ -2,10 +2,11 @@
 /**
  * File for Deodar_Scan_Type.
  *
- * @package           Deodar
- * @author            Brock Cataldi
- * @copyright         2025 Brock Cataldi
- * @license           GPL-2.0-or-later
+ * @package Deodar
+ * @author Brock Cataldi
+ * @copyright 2025 Brock Cataldi
+ * @license GPL-2.0-or-later
+ * @since 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * An Emum to pass to _deodar_scan_for_directories and _deodar_scan_for_files,
  * to specify the return type.
+ * 
+ * @since 2.0.0
  */
 enum Deodar_Scan_Type {
 	case PATHS;

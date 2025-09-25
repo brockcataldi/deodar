@@ -2,10 +2,11 @@
 /**
  * Class file for Deodar Post Type
  *
- * @package           Deodar
- * @author            Brock Cataldi
- * @copyright         2025 Brock Cataldi
- * @license           GPL-2.0-or-later
+ * @package Deodar
+ * @author Brock Cataldi
+ * @copyright 2025 Brock Cataldi
+ * @license GPL-2.0-or-later
+ * @since 2.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,10 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The class for Deodar Post Type
  *
- * @package           Deodar
- * @author            Brock Cataldi
- * @copyright         2025 Brock Cataldi
- * @license           GPL-2.0-or-later
+ * @since 2.0.0
  */
 abstract class Deodar_Post_Type {
 
@@ -48,6 +46,8 @@ abstract class Deodar_Post_Type {
 
 	/**
 	 * Register's the post type
+	 * 
+	 * @see https://developer.wordpress.org/reference/functions/register_post_type/
 	 *
 	 * @since 2.0.0
 	 * @return void
@@ -64,6 +64,8 @@ abstract class Deodar_Post_Type {
 	/**
 	 * Add's the ACF Field Group to the Post Type
 	 *
+	 * @see https://www.advancedcustomfields.com/resources/register-fields-via-php/
+	 * 
 	 * @since 2.0.0
 	 * @return void
 	 */
