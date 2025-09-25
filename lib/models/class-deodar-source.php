@@ -40,6 +40,14 @@ class Deodar_Source {
 	public string $base_url = '';
 
 	/**
+	 * The menus registered to the source.
+	 *
+	 * @since 2.0.0
+	 * @var array $menus Associative array of menus to be registered.
+	 */
+	public array $menus = array();
+
+	/**
 	 * The scripts bound to the the source.
 	 *
 	 * @since 2.0.0
@@ -75,15 +83,6 @@ class Deodar_Source {
 	private null|array $acf_blocks_paths = null;
 
 	/**
-	 * The cached post types class names.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @var null|string[] $post_types The names of the included post types.
-	 */
-	private null|array $post_types = null;
-
-	/**
 	 * The cached includes
 	 *
 	 * @since 2.0.0
@@ -112,6 +111,10 @@ class Deodar_Source {
 		}
 		$this->base_path = $data['path'];
 		$this->base_url  = $data['url'];
+
+		if ( true === isset( $data['menus'] ) && Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $data['menus'] ) ) {
+			$this->menus = $data['menus'];
+		}
 
 		$this->styles   = $this->hydrate( $data['styles'], 'Deodar_Style' );
 		$this->scripts  = $this->hydrate( $data['scripts'], 'Deodar_Script' );
@@ -166,8 +169,14 @@ class Deodar_Source {
 	 * @return void
 	 */
 	public function after_setup_theme() {
+		$this->load_walkers();
+
 		foreach ( $this->supports as $support ) {
 			$support->add();
+		}
+
+		if ( false === empty( $this->menus ) ) {
+			register_nav_menus( $this->menus );
 		}
 	}
 
@@ -282,6 +291,28 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Load_includes function.
+	 *
+	 * Dynamically loads php files wihin a type matching a pattern.
+	 * For example walkers, while not registered, they still need to be loaded.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $type The type and folder of the includes.
+	 * @param string $pattern The file regex to match against.
+	 */
+	private function load_includes( string $type, string $pattern ) {
+		$includes_dir_path = path_join( $this->base_path, path_join( 'includes', $type ) );
+		$includes          = _deodar_scan_for_files( $includes_dir_path );
+
+		foreach ( $includes as [$name, $path] ) {
+			if ( preg_match( $pattern, $name, $matches ) ) {
+				include $path;
+			}
+		}
+	}
+
+	/**
 	 * Get_acf_blocks_paths function.
 	 *
 	 * Returns all of the directories in the root/blocks/acf path.
@@ -312,10 +343,11 @@ class Deodar_Source {
 		return $this->acf_blocks_paths;
 	}
 
+
 	/**
-	 * Get_includes function
+	 * Get_deodar_includes function.
 	 *
-	 * Loads and caches classes within the includes folder.
+	 * Loads and caches Deoddar abstract classes within the includes folder.
 	 *
 	 * @since 2.0.0
 	 *
@@ -325,7 +357,7 @@ class Deodar_Source {
 	 *
 	 * @return Deodar_Post_Type[]|Deodar_Taxonomy[]|Deodar_Customization[] The array of loaded includes.
 	 */
-	private function get_includes( string $type, string $pattern, string $suffix ): array {
+	private function get_deodar_includes( string $type, string $pattern, string $suffix ): array {
 		if ( true === isset( $this->includes[ $type ] ) ) {
 			return $this->includes[ $type ];
 		}
@@ -366,13 +398,12 @@ class Deodar_Source {
 	 * @return array The loaded post types.
 	 */
 	private function get_post_types() {
-		return $this->get_includes(
+		return $this->get_deodar_includes(
 			'post-types',
 			'/^class-([A-Za-z0-9-]+)\.post-type\.php$/',
 			'_Post_Type'
 		);
 	}
-
 
 	/**
 	 * Get_taxonomies function.
@@ -383,7 +414,7 @@ class Deodar_Source {
 	 * @return array The loaded post types.
 	 */
 	private function get_taxonomies() {
-		return $this->get_includes(
+		return $this->get_deodar_includes(
 			'taxonomies',
 			'/^class-([A-Za-z0-9-]+)\.taxonomy\.php$/',
 			'_Taxonomy'
@@ -399,10 +430,25 @@ class Deodar_Source {
 	 * @return array The loaded post types.
 	 */
 	private function get_customizations() {
-		return $this->get_includes(
+		return $this->get_deodar_includes(
 			'customizations',
 			'/^class-([A-Za-z0-9-]+)\.customization\.php$/',
 			'_Customization'
+		);
+	}
+
+	/**
+	 * Load_walkers function.
+	 *
+	 * Loads all of the walkers within the walkers folder.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	private function load_walkers(): void {
+		$this->load_includes(
+			'walkers',
+			'/^class-([A-Za-z0-9-]+)\.walker\.php$/',
 		);
 	}
 
