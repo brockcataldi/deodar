@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Base class for Deodar
- * 
+ *
  * @since 2.0.0
  */
 class Deodar {

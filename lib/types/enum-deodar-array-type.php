@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Deodar_Array_Type.
  *
  * For use in _deodar_array_type;
- * 
+ *
  * @since 2.0.0
  */
 enum Deodar_Array_Type {

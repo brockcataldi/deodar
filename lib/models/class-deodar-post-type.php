@@ -46,7 +46,7 @@ abstract class Deodar_Post_Type {
 
 	/**
 	 * Register's the post type
-	 * 
+	 *
 	 * @see https://developer.wordpress.org/reference/functions/register_post_type/
 	 *
 	 * @since 2.0.0
@@ -65,7 +65,7 @@ abstract class Deodar_Post_Type {
 	 * Add's the ACF Field Group to the Post Type
 	 *
 	 * @see https://www.advancedcustomfields.com/resources/register-fields-via-php/
-	 * 
+	 *
 	 * @since 2.0.0
 	 * @return void
 	 */

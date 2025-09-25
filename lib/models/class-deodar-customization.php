@@ -22,16 +22,16 @@ abstract class Deodar_Customization {
 	 *
 	 * @since 2.0.0
 	 */
-	public function __construct(){}
+	public function __construct() {}
 
 	/**
 	 * The actual registration for the customizer.
-     *
-     * @see https://developer.wordpress.org/themes/customize-api/customizer-objects/
+	 *
+	 * @see https://developer.wordpress.org/themes/customize-api/customizer-objects/
 	 * @since 2.0.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize the WP_Customize_Manager.
-     * @return void
+	 * @return void
 	 */
 	abstract public function register( WP_Customize_Manager $wp_customize ): void;
 }
