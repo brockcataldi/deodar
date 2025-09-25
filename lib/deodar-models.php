@@ -26,7 +26,7 @@ if ( false === class_exists( 'Deodar_Style' ) ) {
 }
 
 if ( false === class_exists( 'Deodar_Customization' ) ) {
-	require DEODAR_MODELS_PATH . '/class-deodar-deodar-customization.php';
+	require DEODAR_MODELS_PATH . '/class-deodar-customization.php';
 }
 
 if ( false === class_exists( 'Deodar_Post_Type' ) ) {

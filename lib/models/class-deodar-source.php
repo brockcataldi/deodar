@@ -51,6 +51,7 @@ class Deodar_Source {
 	 * The styles bound to the the source.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @var Deodar_Style[] $styles The source styles.
 	 */
 	public array $styles = array();
@@ -59,6 +60,7 @@ class Deodar_Source {
 	 * The theme supports bound to the the source.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @var Deodar_Support[] $supports The source theme supports.
 	 */
 	public array $supports = array();
@@ -67,6 +69,7 @@ class Deodar_Source {
 	 * The cached ACF block paths.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @var null|string[] $acf_blocks_paths The paths of the ACF blocks.
 	 */
 	private null|array $acf_blocks_paths = null;
@@ -75,6 +78,7 @@ class Deodar_Source {
 	 * The cached post types class names.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @var null|string[] $post_types The names of the included post types.
 	 */
 	private null|array $post_types = null;
@@ -83,6 +87,7 @@ class Deodar_Source {
 	 * The cached includes
 	 *
 	 * @since 2.0.0
+	 *
 	 * @var array[] $includes the cache of get include
 	 */
 	private array $includes = array();
@@ -91,8 +96,11 @@ class Deodar_Source {
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @param array $data Deodar config array.
+	 *
 	 * @throws InvalidArgumentException Only throws when the ['path'] and ['url'] aren't set.
+	 *
 	 * @return void
 	 */
 	public function __construct( array $data ) {
@@ -143,9 +151,9 @@ class Deodar_Source {
 	public function bind() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'acf/include_fields', array( $this, 'acf_include_fields' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
-
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
+		add_action( 'customize_register', array( $this, 'customize_register' ) );
 		$this->after_setup_theme();
 	}
 
@@ -222,6 +230,7 @@ class Deodar_Source {
 	 * Called at the `admin_enqueue_scripts` hook.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return void
 	 */
 	public function admin_enqueue_scripts() {
@@ -235,11 +244,31 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Customize_register function.
+	 *
+	 * Called at the `customize_register` hook.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param WP_Customize_Manager $wp_customize The WP_Customize_Manager.
+	 *
+	 * @return void
+	 */
+	public function customize_register( WP_Customize_Manager $wp_customize ) {
+		foreach ( $this->get_customizations() as $customization ) {
+			if ( method_exists( $customization, 'register' ) ) {
+				$customization->register( $wp_customize );
+			}
+		}
+	}
+
+	/**
 	 * Wp_enqueue_scripts function.
 	 *
 	 * Called at the `wp_enqueue_scripts` hook.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return void
 	 */
 	public function wp_enqueue_scripts() {
@@ -258,6 +287,7 @@ class Deodar_Source {
 	 * Returns all of the directories in the root/blocks/acf path.
 	 *
 	 * @since 2.0.0
+	 *
 	 * @return string[]
 	 */
 	private function get_acf_blocks_paths() {
@@ -287,11 +317,15 @@ class Deodar_Source {
 	 *
 	 * Loads and caches classes within the includes folder.
 	 *
+	 * @since 2.0.0
+	 *
 	 * @param string $type The type and folder of the includes.
 	 * @param string $pattern The file regex to match against.
 	 * @param string $suffix The end of the classname that's enforced.
+	 *
+	 * @return Deodar_Post_Type[]|Deodar_Taxonomy[]|Deodar_Customization[] The array of loaded includes.
 	 */
-	private function get_includes( string $type, string $pattern, string $suffix ) {
+	private function get_includes( string $type, string $pattern, string $suffix ): array {
 		if ( true === isset( $this->includes[ $type ] ) ) {
 			return $this->includes[ $type ];
 		}
@@ -355,6 +389,23 @@ class Deodar_Source {
 			'_Taxonomy'
 		);
 	}
+
+	/**
+	 * Get_customizations function.
+	 *
+	 * Loads and returns all of the Customization classes in an array.
+	 *
+	 * @since 2.0.0
+	 * @return array The loaded post types.
+	 */
+	private function get_customizations() {
+		return $this->get_includes(
+			'customizations',
+			'/^class-([A-Za-z0-9-]+)\.customization\.php$/',
+			'_Customization'
+		);
+	}
+
 
 	/**
 	 * Register_blocks function.

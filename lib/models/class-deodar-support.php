@@ -43,6 +43,7 @@ class Deodar_Support {
 	 *
 	 * @since 2.0.0
 	 * @param string|array $data The theme support data.
+	 * @throws InvalidArgumentException If $data is invalid.
 	 * @return void
 	 */
 	public function __construct( string|array $data ) {
@@ -59,15 +60,14 @@ class Deodar_Support {
 				);
 			}
 
+			if ( false === isset( $data['args'] ) || false === is_array( $data['args'] ) ) {
+				throw new InvalidArgumentException(
+					'"args" must be an array if provided in support configuration.'
+				);
+			}
+
 			$this->feature = $data['feature'];
 			$this->args    = $data['args'];
-
-			// if (!is_array($this->args)) {
-			// throw new InvalidArgumentException(
-			// '"args" must be an array if provided in support configuration.'
-			// );
-			// }
-
 			return;
 		}
 
