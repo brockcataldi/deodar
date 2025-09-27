@@ -12,7 +12,7 @@
  * Plugin URI:        https://deodar.io
  * Description:       Developer friendly bridge to the ACF Pro and WordPress APIs
  * Version:           2.0.0
- * Requires at least: 6.7.2
+ * Requires at least: 6.8
  * Requires PHP:      8.2
  * Author:            Brock Cataldi
  * Author URI:        https://brockcataldi.com
