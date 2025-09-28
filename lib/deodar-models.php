@@ -13,6 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( false === class_exists( 'Deodar_Block_Style' ) ) {
+	require DEODAR_MODELS_PATH . '/class-deodar-block-style.php';
+}
+
 if ( false === class_exists( 'Deodar_Enqueuable' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-enqueuable.php';
 }

@@ -24,6 +24,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Deodar_Source {
 
 	/**
+	 * The name of the source.
+	 *
+	 * @since 2.0.0
+	 * @var string $name The name of the source.
+	 */
+	public string $name = '';
+
+	/**
+	 * Whether or not the source is in production mode.
+	 *
+	 * @since 2.0.0
+	 * @var bool $production Whether or not the source is in production mode.
+	 */
+	public bool $production = false;
+
+	/**
 	 * The file path location of the source.
 	 *
 	 * @since 2.0.0
@@ -32,12 +48,28 @@ class Deodar_Source {
 	public string $base_path = '';
 
 	/**
+	 * The directory path of /blocks/
+	 *
+	 * @since 2.0.0
+	 * @var string $blocks_dir_path The path for the blocks folder.
+	 */
+	public string $blocks_dir_path = '';
+
+	/**
 	 * The url location of the source.
 	 *
 	 * @since 2.0.0
 	 * @var string $base_url The source path.
 	 */
 	public string $base_url = '';
+
+	/**
+	 * The url path of /blocks/
+	 *
+	 * @since 2.0.0
+	 * @var string $blocks_dir_url The url for the blocks folder.
+	 */
+	public string $blocks_dir_url = '';
 
 	/**
 	 * The menus registered to the source.
@@ -59,7 +91,6 @@ class Deodar_Source {
 	 * The styles bound to the the source.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @var Deodar_Style[] $styles The source styles.
 	 */
 	public array $styles = array();
@@ -68,7 +99,6 @@ class Deodar_Source {
 	 * The theme supports bound to the the source.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @var Deodar_Support[] $supports The source theme supports.
 	 */
 	public array $supports = array();
@@ -77,16 +107,22 @@ class Deodar_Source {
 	 * The cached ACF block paths.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @var null|string[] $acf_blocks_paths The paths of the ACF blocks.
 	 */
 	private null|array $acf_blocks_paths = null;
 
 	/**
+	 * The cached block styles
+	 *
+	 * @since 2.0.0
+	 * @var null|array[] $block_styles The cached block styles.
+	 */
+	private null|array $block_styles = null;
+
+	/**
 	 * The cached includes
 	 *
 	 * @since 2.0.0
-	 *
 	 * @var array[] $includes the cache of get include
 	 */
 	private array $includes = array();
@@ -95,22 +131,28 @@ class Deodar_Source {
 	 * Deodar Source constructor.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @param array $data Deodar config array.
-	 *
 	 * @throws InvalidArgumentException Only throws when the ['path'] and ['url'] aren't set.
-	 *
 	 * @return void
 	 */
 	public function __construct( array $data ) {
 
-		if ( empty( $data['path'] ) || empty( $data['url'] ) ) {
+		if ( empty( $data['path'] ) || empty( $data['url'] ) || empty( $data['name'] ) ) {
 			throw new InvalidArgumentException(
-				'Deodar source requires both "path" and "url".'
+				'Deodar source requires both "path", "url" and "name".'
 			);
 		}
+
+		$this->name      = $data['name'];
 		$this->base_path = $data['path'];
 		$this->base_url  = $data['url'];
+
+		$this->blocks_dir_path = path_join( $this->base_path, 'blocks' );
+		$this->blocks_dir_url  = sprintf( '%s/blocks', $this->base_url );
+
+		if ( true === isset( $data['production'] ) && true === is_bool( $data['production'] ) ) {
+			$this->production = $data['production'];
+		}
 
 		if ( true === isset( $data['menus'] ) && Deodar_Array_Type::ASSOCIATIVE === _deodar_array_type( $data['menus'] ) ) {
 			$this->menus = $data['menus'];
@@ -178,6 +220,13 @@ class Deodar_Source {
 		if ( false === empty( $this->menus ) ) {
 			register_nav_menus( $this->menus );
 		}
+
+		foreach ( $this->get_block_styles() as $block_style ) {
+			$block_style->enqueue(
+				$this->blocks_dir_path,
+				$this->blocks_dir_url
+			);
+		}
 	}
 
 	/**
@@ -239,7 +288,6 @@ class Deodar_Source {
 	 * Called at the `admin_enqueue_scripts` hook.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @return void
 	 */
 	public function admin_enqueue_scripts() {
@@ -258,9 +306,7 @@ class Deodar_Source {
 	 * Called at the `customize_register` hook.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @param WP_Customize_Manager $wp_customize The WP_Customize_Manager.
-	 *
 	 * @return void
 	 */
 	public function customize_register( WP_Customize_Manager $wp_customize ) {
@@ -277,7 +323,6 @@ class Deodar_Source {
 	 * Called at the `wp_enqueue_scripts` hook.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @return void
 	 */
 	public function wp_enqueue_scripts() {
@@ -291,15 +336,56 @@ class Deodar_Source {
 	}
 
 	/**
+	 * Get_block_styles function.
+	 *
+	 * Creates Deodar_Block_Style objects and eventually caches the paths.
+	 *
+	 * @since 2.0.0
+	 * @return array Array of Deodar_Block_Style.
+	 */
+	private function get_block_styles() {
+		if ( true === isset( $block_styles ) ) {
+			return $this->block_styles;
+		}
+
+		$blocks_dir_children = _deodar_scan_for_directories(
+			$this->blocks_dir_path,
+			Deodar_Scan_Type::BOTH
+		);
+
+		$acf_index = array_search( 'acf', $blocks_dir_children, true );
+
+		if ( false !== $acf_index ) {
+			unset( $blocks_dir_children );
+		}
+
+		$block_styles = array();
+
+		foreach ( $blocks_dir_children as [$block_namespace, $block_namespace_path] ) {
+			$child_dir_children = _deodar_scan_for_directories(
+				$block_namespace_path,
+				Deodar_Scan_Type::NAMES
+			);
+
+			foreach ( $child_dir_children as $block_name ) {
+				$block_styles[] = new Deodar_Block_Style( $block_name, $block_namespace );
+			}
+		}
+
+		$this->block_styles = $block_styles;
+		return $this->block_styles;
+	}
+
+	/**
 	 * Load_includes function.
 	 *
 	 * Dynamically loads php files wihin a type matching a pattern.
 	 * For example walkers, while not registered, they still need to be loaded.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @param string $type The type and folder of the includes.
 	 * @param string $pattern The file regex to match against.
+	 * @return void
 	 */
 	private function load_includes( string $type, string $pattern ) {
 		$includes_dir_path = path_join( $this->base_path, path_join( 'includes', $type ) );
@@ -318,7 +404,6 @@ class Deodar_Source {
 	 * Returns all of the directories in the root/blocks/acf path.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @return string[]
 	 */
 	private function get_acf_blocks_paths() {
@@ -350,11 +435,9 @@ class Deodar_Source {
 	 * Loads and caches Deoddar abstract classes within the includes folder.
 	 *
 	 * @since 2.0.0
-	 *
 	 * @param string $type The type and folder of the includes.
 	 * @param string $pattern The file regex to match against.
 	 * @param string $suffix The end of the classname that's enforced.
-	 *
 	 * @return Deodar_Post_Type[]|Deodar_Taxonomy[]|Deodar_Customization[] The array of loaded includes.
 	 */
 	private function get_deodar_includes( string $type, string $pattern, string $suffix ): array {

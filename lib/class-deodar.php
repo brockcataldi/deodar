@@ -19,10 +19,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.0.0
  */
 class Deodar {
+
+	/**
+	 * The sources bound to Deodar.
+	 *
+	 * @since 2.0.0
+	 * @var array $sources the bound sources.
+	 */
+	public array $sources = array();
+
 	/**
 	 * Deodar constructor.
 	 *
 	 * Meant to be empty
+	 *
+	 * @since 2.0.0
 	 */
 	public function __construct() {}
 
@@ -30,15 +41,19 @@ class Deodar {
 	 * Bind function
 	 *
 	 * Meant to bind needed hooks.
+	 *
+	 * @since 2.0.0
 	 */
 	public function bind() {
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 	}
 
 	/**
-	 *  After_setup_theme function.
+	 * After_setup_theme function.
 	 *
 	 * Meant to bind to the `after_setup_theme` hook.
+	 *
+	 * @since 2.0.0
 	 */
 	public function after_setup_theme() {
 		$sources_data = apply_filters( 'deodar', array() );
@@ -46,6 +61,7 @@ class Deodar {
 		foreach ( $sources_data as $source_data ) {
 			$source = new Deodar_Source( $source_data );
 			$source->bind();
+			$sources[] = $source;
 		}
 	}
 }

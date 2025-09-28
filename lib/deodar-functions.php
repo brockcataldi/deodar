@@ -107,12 +107,12 @@ if ( false === function_exists( '_deodar_format_group' ) ) {
 	/**
 	 * Formatting an entire ACF Group
 	 *
+	 * @since 2.0.0
 	 * @param array  $group The group to format.
 	 * @param string $prefix The prefix to the key, ie "block" or "post_type".
 	 * @param string $slug The lowercase name of the block.
 	 * @param string $title The title of the group.
 	 * @param array  $location The location information of the group.
-	 *
 	 * @return array|null The result of the format, null if invalid.
 	 */
 	function _deodar_format_group(
@@ -156,8 +156,8 @@ if ( false === function_exists( '_deodar_scan_for_directories' ) ) {
 	 * Will return empty array even if the path doesn't exist.
 	 *
 	 * @since 2.0.0
-	 * @param string           $path The path to search (defaults to PATHS).
-	 * @param Deodar_Scan_Type $type The expected return value.
+	 * @param string           $path The path to search.
+	 * @param Deodar_Scan_Type $type The expected return value (defaults to PATHS).
 	 * @return string|array[]
 	 */
 	function _deodar_scan_for_directories(
@@ -233,6 +233,7 @@ if ( false === function_exists( '_deodar_get_template_name' ) ) {
 	 * Returns the name of the php template used on the page. Which includes the
 	 * extension.
 	 *
+	 * @since 2.0.0
 	 * @return string the template name.
 	 */
 	function _deodar_get_template_name() {

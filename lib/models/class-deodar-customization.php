@@ -9,6 +9,10 @@
  * @since 2.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Deodar Customization class
  *
@@ -18,7 +22,7 @@
  */
 abstract class Deodar_Customization {
 	/**
-	 * Constructor
+	 * Constructor for Deodar Customization
 	 *
 	 * @since 2.0.0
 	 */
@@ -29,7 +33,6 @@ abstract class Deodar_Customization {
 	 *
 	 * @see https://developer.wordpress.org/themes/customize-api/customizer-objects/
 	 * @since 2.0.0
-	 *
 	 * @param WP_Customize_Manager $wp_customize the WP_Customize_Manager.
 	 * @return void
 	 */

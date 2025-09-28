@@ -35,9 +35,9 @@ enum Deodar_Scan_Type {
 	 * PATHS => the full file paths.
 	 * BOTH => both names and paths.
 	 *
+	 * @since 2.0.0
 	 * @param string $name the filename.
 	 * @param string $base the basepath.
-	 *
 	 * @return string|array The expected return
 	 */
 	public function resolve( string $name, string $base ): string|array {

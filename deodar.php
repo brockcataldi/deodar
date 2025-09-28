@@ -45,7 +45,6 @@ if ( ! defined( 'DEODAR_TYPES_PATH' ) ) {
 	define( 'DEODAR_TYPES_PATH', path_join( DEODAR_LIB_PATH, 'types' ) );
 }
 
-
 require DEODAR_LIB_PATH . '/deodar-enums.php';
 require DEODAR_LIB_PATH . '/deodar-functions.php';
 require DEODAR_LIB_PATH . '/deodar-models.php';
