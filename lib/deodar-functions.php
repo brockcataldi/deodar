@@ -52,102 +52,6 @@ if ( false === function_exists( '_deodar_classify' ) ) {
 	}
 }
 
-if ( false === function_exists( '_deodar_format_fields' ) ) {
-	/**
-	 * Formatting ACF Fields
-	 *
-	 * Will return a properly formatted fields array, ensure keys are added to all fields.
-	 *
-	 * @since 2.0.0
-	 * @param array[] $fields The fields to be formatted.
-	 * @param string  $id The prefix string to use when automatic keying, ie "block".
-	 * @param int     $depth The depth of the fields.
-	 * @return array[] The formatted fields
-	 */
-	function _deodar_format_fields( array $fields, string $id, int $depth = 0 ): array {
-
-		if ( false === is_array( $fields ) ) {
-			return array();
-		}
-
-		if ( false === array_is_list( $fields ) ) {
-			$fields = array( $fields );
-		}
-
-		$results = array();
-		$prefix  = str_repeat( 'sub_', $depth );
-
-		foreach ( $fields as $field ) {
-
-			if ( false === isset( $field['key'] ) ) {
-				$field['key'] = sprintf(
-					'%sfield_%s_%s',
-					$prefix,
-					$id,
-					$field['name']
-				);
-			}
-
-			if ( true === isset( $field['sub_fields'] ) ) {
-				$field['sub_fields'] = _deodar_format_fields(
-					$field['sub_fields'],
-					$id,
-					$depth + 1
-				);
-			}
-
-			$results[] = $field;
-		}
-
-		return $results;
-	}
-}
-
-if ( false === function_exists( '_deodar_format_group' ) ) {
-	/**
-	 * Formatting an entire ACF Group
-	 *
-	 * @since 2.0.0
-	 * @param array  $group The group to format.
-	 * @param string $prefix The prefix to the key, ie "block" or "post_type".
-	 * @param string $slug The lowercase name of the block.
-	 * @param string $title The title of the group.
-	 * @param array  $location The location information of the group.
-	 * @return array|null The result of the format, null if invalid.
-	 */
-	function _deodar_format_group(
-		array $group,
-		string $prefix,
-		string $slug,
-		string $title,
-		array $location
-	): array|null {
-
-		if ( false === isset( $group['fields'] ) || true === empty( $group['fields'] ) ) {
-			return null;
-		}
-
-		$group['fields'] = _deodar_format_fields(
-			$group['fields'],
-			sprintf( '%s_%s', $prefix, $slug )
-		);
-
-		$group['location'] = array(
-			array( $location ),
-		);
-
-		if ( false === isset( $group['key'] ) ) {
-			$group['key'] = sprintf( 'group_%s_%s', $prefix, $slug );
-		}
-
-		if ( false === isset( $group['title'] ) ) {
-			$group['title'] = $title;
-		}
-
-		return $group;
-	}
-}
-
 if ( false === function_exists( '_deodar_scan_for_directories' ) ) {
 
 	/**
@@ -236,7 +140,59 @@ if ( false === function_exists( '_deodar_get_template_name' ) ) {
 	 * @since 2.0.0
 	 * @return string the template name.
 	 */
-	function _deodar_get_template_name() {
+	function _deodar_get_template_name(): string {
 		return basename( get_page_template() );
+	}
+}
+
+
+if ( false === function_exists( '_deodar_flatten_location' ) ) {
+	/**
+	 * Returns the locations array and flattens it.
+	 *
+	 * @since 2.0.0
+	 * @param array $location The ACF location data.
+	 * @return array The locations.
+	 */
+	function _deodar_flatten_location( array $location ): array {
+		$flat = array();
+		foreach ( $location as $group ) {
+			foreach ( $group as $rule ) {
+				if ( false === isset( $rule['param'] ) ) {
+					continue;
+				}
+
+				if ( false === isset( $rule['operator'] ) ) {
+					continue;
+				}
+
+				if ( false === isset( $rule['value'] ) ) {
+					continue;
+				}
+
+				$flat[] = $rule;
+			}
+		}
+		return $flat;
+	}
+}
+
+
+if ( false === function_exists( '_deodar_get_type_from_key' ) ) {
+	/**
+	 * Get type of save based on the ACF key.
+	 *
+	 * @since 2.0.0
+	 * @param string $key The ACF key.
+	 * @return string|null Either the key or null if there is none.
+	 */
+	function _deodar_get_type_from_key( string $key ): string|null {
+		$pos = strrpos( $key, '_' );
+
+		if ( false !== $pos ) {
+			return substr( $key, 0, $pos );
+		}
+
+		return null;
 	}
 }
