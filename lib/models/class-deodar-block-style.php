@@ -67,14 +67,14 @@ class Deodar_Block_Style {
 			array(
 				'handle' => sprintf( 'deodar-%s-%s', $this->block_namespace, $this->name ),
 				'src'    => sprintf(
-					'%s/%s/%s/%s.build.css',
+					'%s/%s/%s/build/%s.build.css',
 					$blocks_dir_url,
 					$this->block_namespace,
 					$this->name,
 					$this->name
 				),
 				'path'   => sprintf(
-					'%s/%s/%s/%s.build.css',
+					'%s/%s/%s/build/%s.build.css',
 					$blocks_dir_path,
 					$this->block_namespace,
 					$this->name,
