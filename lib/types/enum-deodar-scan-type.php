@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Deodar_Scan_Type
  *
- * An Emum to pass to _deodar_scan_for_directories and _deodar_scan_for_files,
+ * An Enum to pass to _deodar_scan_for_directories and _deodar_scan_for_files,
  * to specify the return type.
  *
  * @since 2.0.0

@@ -25,7 +25,7 @@ class Deodar_Style extends Deodar_Enqueuable {
 	 * The media attribute of the stylesheet.
 	 *
 	 * @since 2.0.0
-	 * @var string $media The stylesheet's version.
+	 * @var string $media The stylesheet's media attribute.
 	 */
 	private string $media = '';
 

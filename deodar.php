@@ -33,10 +33,6 @@ if ( ! defined( 'DEODAR_LIB_PATH' ) ) {
 	define( 'DEODAR_LIB_PATH', path_join( DEODAR_PATH, 'lib' ) );
 }
 
-if ( ! defined( 'DEODAR_FUNCTIONS_PATH' ) ) {
-	define( 'DEODAR_FUNCTIONS_PATH', path_join( DEODAR_LIB_PATH, 'functions' ) );
-}
-
 if ( ! defined( 'DEODAR_MODELS_PATH' ) ) {
 	define( 'DEODAR_MODELS_PATH', path_join( DEODAR_LIB_PATH, 'models' ) );
 }

@@ -26,7 +26,7 @@ class Deodar_Support {
 	 * The feature (name) of the theme support.
 	 *
 	 * @since 2.0.0
-	 * @var string $feature The script's handle.
+	 * @var string $feature The feature's name.
 	 */
 	private string|null $feature;
 

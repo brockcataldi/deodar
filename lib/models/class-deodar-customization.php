@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Deodar Customization class
  *
- * An abstract class to add customzier options
+ * An abstract class to add customizer options
  *
  * @since 2.0.0
  */

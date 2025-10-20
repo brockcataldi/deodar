@@ -102,7 +102,7 @@ This plugin is licensed under the GPL v2 or later.
 
 ## Support
 
-For support and questions, please visit [deodar.io](https://deodar.io) or contact the author at [brockcataldi.com](https://brockcataldi.com).
+For support and questions, please visit [deodar.io](https://deodar.io).
 
 ## Changelog
 
