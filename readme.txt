@@ -19,9 +19,10 @@ Deodar is a powerful WordPress plugin designed to bridge the gap between Advance
 * **Modular Architecture**: Clean, organized codebase with separation of concerns
 * **ACF Pro Integration**: Seamless bridge to Advanced Custom Fields Pro functionality  
 * **Asset Management**: Built-in classes for managing stylesheets and scripts
-* **Block Support**: Enhanced support for WordPress blocks and block styles
+* **Block Support**: Enhanced support for WordPress blocks, block styles, and block variations
 * **Type Safety**: PHP 8.2+ with enum support for better type checking
 * **WordPress Standards**: Follows WordPress coding standards and best practices
+* **Utility Functions**: Comprehensive set of helper functions for common operations
 
 **Perfect for:**
 
@@ -67,7 +68,9 @@ Deodar focuses specifically on bridging ACF Pro and WordPress APIs with a modula
 1. Clean, modular codebase structure
 2. Asset management classes in action
 3. Block style registration examples
-4. Type-safe enum implementations
+4. Block variations support
+5. Type-safe enum implementations
+6. Utility functions in action
 
 == Changelog ==
 
@@ -77,9 +80,12 @@ Deodar focuses specifically on bridging ACF Pro and WordPress APIs with a modula
 * Enhanced ACF Pro integration
 * Improved asset management system
 * WordPress 6.8 compatibility
+* Added block variations support with automatic loading
+* Added utility functions for safe file inclusion and array searching
+* Reorganized file structure for better maintainability
+* Enhanced block style management with type-safe operations
 * Added comprehensive type safety with enums
 * Implemented proper WordPress coding standards
-* Added utility functions for array and content type detection
 
 = 1.0.0 =
 * Initial release with basic ACF Pro bridge functionality
