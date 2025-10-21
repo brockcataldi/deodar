@@ -131,7 +131,6 @@ if ( false === function_exists( '_deodar_scan_for_files' ) ) {
 	}
 }
 
-
 if ( false === function_exists( '_deodar_get_template_name' ) ) {
 	/**
 	 * Returns the name of the php template used on the page. Which includes the
@@ -144,7 +143,6 @@ if ( false === function_exists( '_deodar_get_template_name' ) ) {
 		return basename( get_page_template() );
 	}
 }
-
 
 if ( false === function_exists( '_deodar_flatten_location' ) ) {
 	/**
@@ -194,5 +192,51 @@ if ( false === function_exists( '_deodar_get_type_from_key' ) ) {
 		}
 
 		return null;
+	}
+}
+
+if ( false === function_exists( '_deodar_safe_include' ) ) {
+	/**
+	 * Safely include a file.
+	 *
+	 * @since 2.0.0
+	 * @param string $path The path to the file.
+	 * @return bool True if the file was included, false otherwise.
+	 */
+	function _deodar_safe_include( string $path ): bool {
+		if ( false === is_file( $path ) ) {
+			return false;
+		}
+
+		if ( false === is_readable( $path ) ) {
+			return false;
+		}
+
+		try {
+			include $path;
+			return true;
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+}
+
+if ( false === function_exists( '_deodar_2d_array_search' ) ) {
+	/**
+	 * Search for a key/value pair in a 2d array.
+	 *
+	 * @since 2.0.0
+	 * @param array      $data_array The array to search.
+	 * @param int|string $key The key to search for.
+	 * @param mixed      $value The value to search for.
+	 * @return int|false The key of the value or false if not found.
+	 */
+	function _deodar_2d_array_search( array $data_array, int|string $key, mixed $value ): int|false {
+		foreach ( $data_array as $index => $item ) {
+			if ( isset( $item[ $key ] ) && $item[ $key ] === $value ) {
+				return $index;
+			}
+		}
+		return false;
 	}
 }

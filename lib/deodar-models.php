@@ -13,6 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( false === enum_exists( 'Deodar_Array_Type' ) ) {
+	require DEODAR_MODELS_PATH . '/enum-deodar-array-type.php';
+}
+
+if ( false === enum_exists( 'Deodar_Scan_Type' ) ) {
+	require DEODAR_MODELS_PATH . '/enum-deodar-scan-type.php';
+}
+
 if ( false === class_exists( 'Deodar_Block_Style' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-block-style.php';
 }

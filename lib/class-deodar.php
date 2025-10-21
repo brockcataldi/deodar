@@ -188,6 +188,8 @@ class Deodar {
 		add_filter( 'acf/json/save_file_name', array( $this, 'save_file_name' ), 10, 2 );
 		add_filter( 'acf/json/save_paths', array( $this, 'save_paths' ), 10, 2 );
 		add_filter( 'acf/settings/load_json', array( $this, 'load_json' ) );
+		add_filter( 'get_block_type_variations', array( $this, 'get_block_type_variations' ), 10, 2 );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_action( 'customize_register', array( $this, 'customize_register' ) );
@@ -357,6 +359,33 @@ class Deodar {
 	}
 
 	/**
+	 * Get_block_type_variations function.
+	 *
+	 * @since 2.0.0
+	 * @param array $variations The variations.
+	 * @param array $block_type The block type.
+	 * @return array The variations.
+	 */
+	public function get_block_type_variations( $variations, $block_type ) {
+		$blocks_styles = $this->get_block_styles();
+
+		if ( false === isset( $blocks_styles[ $block_type->name ] ) ) {
+			return $variations;
+		}
+
+		$block_style = $blocks_styles[ $block_type->name ];
+
+		$result = _deodar_safe_include( $block_style->get_variations_path( $this->path_blocks_dir ) );
+
+		if ( true === $result ) {
+			$filter     = sprintf( 'deodar_%s_variations', str_replace( '/', '_', $block_type->name ) );
+			$variations = apply_filters( $filter, $variations );
+		}
+
+		return $variations;
+	}
+
+	/**
 	 * Init function.
 	 *
 	 * Called at the `init` hook.
@@ -478,7 +507,6 @@ class Deodar {
 		return $this->paths_acf_blocks;
 	}
 
-
 	/**
 	 * Get_block_styles function.
 	 *
@@ -487,7 +515,7 @@ class Deodar {
 	 * @since 2.0.0
 	 * @return array Array of Deodar_Block_Style.
 	 */
-	private function get_block_styles() {
+	private function get_block_styles(): array {
 		if ( true === isset( $this->styles_blocks ) ) {
 			return $this->styles_blocks;
 		}
@@ -497,10 +525,10 @@ class Deodar {
 			Deodar_Scan_Type::BOTH
 		);
 
-		$acf_index = array_search( 'acf', $blocks_dir_children, true );
+		$acf_index = _deodar_2d_array_search( $blocks_dir_children, 0, 'acf' );
 
 		if ( false !== $acf_index ) {
-			unset( $blocks_dir_children );
+			unset( $blocks_dir_children[ $acf_index ] );
 		}
 
 		$styles_blocks = array();
@@ -512,34 +540,13 @@ class Deodar {
 			);
 
 			foreach ( $child_dir_children as $block_name ) {
-				$styles_blocks[] = new Deodar_Block_Style( $block_name, $block_namespace );
+				$block_style = new Deodar_Block_Style( $block_name, $block_namespace );
+				$styles_blocks[ $block_style->get_block_type_name() ] = $block_style;
 			}
 		}
 
 		$this->styles_blocks = $styles_blocks;
 		return $this->styles_blocks;
-	}
-
-
-	/**
-	 * Load_includes function.
-	 *
-	 * Dynamically loads php files wihin a type matching a pattern.
-	 * For example walkers, while not registered, they still need to be loaded.
-	 *
-	 * @since 2.0.0
-	 * @param string $type The type and folder of the includes.
-	 * @param string $pattern The file regex to match against.
-	 * @return void
-	 */
-	private function load_includes( string $type, string $pattern ) {
-		$includes = _deodar_scan_for_files( path_join( $this->path_includes_dir, $type ) );
-
-		foreach ( $includes as [$name, $path] ) {
-			if ( preg_match( $pattern, $name, $matches ) ) {
-				include $path;
-			}
-		}
 	}
 
 	/**
@@ -551,7 +558,7 @@ class Deodar {
 	 * @param string $type The type and folder of the includes.
 	 * @param string $pattern The file regex to match against.
 	 * @param string $suffix The end of the classname that's enforced.
-	 * @return Deodar_Post_Type[]|Deodar_Taxonomy[]|Deodar_Customization[] The array of loaded includes.
+	 * @return Deodar_Customization[] The array of loaded includes.
 	 */
 	private function get_deodar_includes( string $type, string $pattern, string $suffix ): array {
 		if ( true === isset( $this->includes[ $type ] ) ) {
@@ -571,12 +578,12 @@ class Deodar {
 		foreach ( $includes as [$name, $path] ) {
 
 			if ( preg_match( $pattern, $name, $matches ) ) {
-				include $path;
-
-				$class_name = _deodar_classify( $matches[1] ) . $suffix;
-
-				if ( class_exists( $class_name ) ) {
-					$loaded[] = new $class_name();
+				$result = _deodar_safe_include( $path );
+				if ( true === $result ) {
+					$class_name = _deodar_classify( $matches[1] ) . $suffix;
+					if ( class_exists( $class_name ) ) {
+						$loaded[] = new $class_name();
+					}
 				}
 			}
 		}
@@ -594,10 +601,13 @@ class Deodar {
 	 * @return void
 	 */
 	private function load_walkers(): void {
-		$this->load_includes(
-			'walkers',
-			'/^class-([A-Za-z0-9-]+)\.walker\.php$/',
-		);
+		$includes = _deodar_scan_for_files( path_join( $this->path_includes_dir, 'walkers' ) );
+
+		foreach ( $includes as [$name, $path] ) {
+			if ( preg_match( '/^class-([A-Za-z0-9-]+)\.walker\.php$/', $name, $matches ) ) {
+				_deodar_safe_include( $path );
+			}
+		}
 	}
 
 	/**

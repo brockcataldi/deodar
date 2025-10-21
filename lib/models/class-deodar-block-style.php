@@ -52,6 +52,33 @@ class Deodar_Block_Style {
 	}
 
 	/**
+	 * Get_block_type_name function.
+	 *
+	 * @since 2.0.0
+	 * @return string The name of the block type.
+	 */
+	public function get_block_type_name(): string {
+		return sprintf( '%s/%s', $this->block_namespace, $this->name );
+	}
+
+	/**
+	 * Get_variations_path function.
+	 *
+	 * @since 2.0.0
+	 * @param string $blocks_dir_path The file path of the blocks directory.
+	 * @return string The path to the variations file.
+	 */
+	public function get_variations_path( string $blocks_dir_path ): string {
+		return sprintf(
+			'%s/%s/%s/%s.variations.php',
+			$blocks_dir_path,
+			$this->block_namespace,
+			$this->name,
+			$this->name
+		);
+	}
+
+	/**
 	 * Enqueues the block style
 	 *
 	 * @since 2.0.0
