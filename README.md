@@ -65,8 +65,7 @@ deodar/
 ├── lib/
 │   ├── class-deodar.php          # Main plugin class
 │   ├── deodar-functions.php      # Utility functions
-│   ├── deodar-enums.php          # Enum definitions
-│   ├── deodar-models.php         # Model definitions
+│   ├── deodar-models.php         # Model loader
 │   ├── models/                   # Individual model classes and enums
 │   │   ├── class-deodar-enqueuable.php
 │   │   ├── class-deodar-script.php
@@ -76,8 +75,14 @@ deodar/
 │   │   ├── class-deodar-support.php
 │   │   ├── enum-deodar-array-type.php
 │   │   └── enum-deodar-scan-type.php
+│   └── index.php                 # Security file
+├── vendor/                       # Composer dependencies
 ├── deodar.php                    # Plugin entry point
-└── composer.json                 # Dependencies
+├── index.php                     # Security file
+├── composer.json                 # Dependencies
+├── composer.lock                 # Lock file
+├── README.md                     # This file
+└── readme.txt                    # WordPress.org readme
 ```
 
 ### Building
@@ -98,6 +103,10 @@ composer archive --format=zip --file=deodar --dir=./build
 ## License
 
 This plugin is licensed under the GPL v2 or later.
+
+## Documentation
+
+For comprehensive documentation, usage examples, and API reference, please visit [deodar.io](https://deodar.io).
 
 ## Support
 
