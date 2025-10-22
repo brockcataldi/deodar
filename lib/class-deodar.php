@@ -258,19 +258,25 @@ class Deodar {
 	 *
 	 * Used to custom name acf sync json.
 	 *
-	 * TODO SHOULD NOT BE TIED TO NAME, LOCATION, THEN NAME
-	 *
 	 * @since 2.0.0
 	 * @param string $filename The current filename.
 	 * @param array  $post The field group data.
 	 * @return string The filename.
 	 */
 	public function save_file_name( $filename, $post ) {
-		if ( false === isset( $post['title'] ) ) {
-			return $filename;
+		if ( true === isset( $post['location'] ) ) {
+			$location = _deodar_flatten_location( $post['location'] );
+
+			if ( 1 === count( $location ) ) {
+				return sprintf( '%s.field-group.json', sanitize_title( basename( $location[0]['value'] ) ) );
+			}
 		}
 
-		return sanitize_title( $post['title'] ) . '.field-group.json';
+		if ( true === isset( $post['title'] ) ) {
+			return sanitize_title( $post['title'] ) . '.field-group.json';
+		}
+
+		return $filename;
 	}
 
 	/**
