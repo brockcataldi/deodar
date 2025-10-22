@@ -115,6 +115,17 @@ Deodar is open source and welcomes contributions! Here's how to get started:
 * Test your changes thoroughly
 
 **Getting Help:**
-* Visit [deodar.io](https://deodar.io) for documentation
+* Visit [deodar.io](https://deodar.io) for comprehensive documentation, usage examples, and API reference
 * Contact the author at [brockcataldi.com](https://brockcataldi.com)
 * Check the GitHub repository for issues and discussions
+
+== Documentation ==
+
+For comprehensive documentation, usage examples, and API reference, please visit [deodar.io](https://deodar.io).
+
+The documentation website provides:
+* Complete API reference
+* Usage examples and tutorials
+* Best practices and patterns
+* Integration guides
+* Troubleshooting tips
