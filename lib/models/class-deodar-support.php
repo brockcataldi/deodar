@@ -85,6 +85,7 @@ class Deodar_Support {
 	public function add() {
 		if ( true === is_null( $this->args ) ) {
 			add_theme_support( $this->feature );
+			return;
 		}
 
 		add_theme_support( $this->feature, $this->args );

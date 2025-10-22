@@ -1,6 +1,6 @@
 <?php
 /**
- * Index.php surves no purpose
+ * Index.php serves no purpose
  *
  * @package Deodar
  * @author Brock Cataldi

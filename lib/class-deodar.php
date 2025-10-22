@@ -225,7 +225,7 @@ class Deodar {
 	/**
 	 * Deodar constructor.
 	 *
-	 * Meant to be empty
+	 * Meant to be empty, because it's not needed.
 	 *
 	 * @since 2.0.0
 	 * @return void
