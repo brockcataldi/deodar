@@ -10,7 +10,6 @@ A developer-friendly bridge to the ACF Pro and WordPress APIs, providing a modul
 - **Block Support**: Enhanced support for WordPress blocks, block styles, and block variations
 - **Type Safety**: PHP 8.2+ with enum support for better type checking
 - **WordPress Standards**: Follows WordPress coding standards and best practices
-- **Utility Functions**: Comprehensive set of helper functions for common operations
 
 ## Requirements
 
