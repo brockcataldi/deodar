@@ -56,11 +56,11 @@ class Deodar_Style extends Deodar_Enqueuable {
 	 * $url_root to actually enqueue the file.
 	 *
 	 * @since 2.0.0
-	 * @param string $url_root The base source url.
-	 * @param bool   $end Which end is being loaded, frontend is true, backend is false.
+	 * @param string     $url_root The base source url.
+	 * @param Deodar_End $end Which end is being loaded, frontend is true, backend is false.
 	 * @return void
 	 */
-	public function enqueue( string $url_root, bool $end ): void {
+	public function enqueue( string $url_root, Deodar_End $end ): void {
 		if ( false === $this->should_enqueue( $end ) ) {
 			return;
 		}

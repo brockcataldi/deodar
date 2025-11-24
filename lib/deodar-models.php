@@ -21,6 +21,10 @@ if ( false === enum_exists( 'Deodar_Scan_Type' ) ) {
 	require DEODAR_MODELS_PATH . '/enum-deodar-scan-type.php';
 }
 
+if ( false === enum_exists( 'Deodar_End' ) ) {
+	require DEODAR_MODELS_PATH . '/enum-deodar-end.php';
+}
+
 if ( false === class_exists( 'Deodar_Block_Style' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-block-style.php';
 }
@@ -43,4 +47,8 @@ if ( false === class_exists( 'Deodar_Customization' ) ) {
 
 if ( false === class_exists( 'Deodar_Support' ) ) {
 	require DEODAR_MODELS_PATH . '/class-deodar-support.php';
+}
+
+if ( false === class_exists( 'Deodar_Extension' ) ) {
+	require DEODAR_MODELS_PATH . '/class-deodar-extension.php';
 }

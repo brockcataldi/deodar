@@ -111,6 +111,30 @@ class Deodar {
 	public string $path_options_pages_dir = '';
 
 	/**
+	 * The directory path of /includes/extensions/
+	 *
+	 * @since 2.1.0
+	 * @var string $path_extensions_dir The path for the extensions folder.
+	 */
+	public string $path_extensions_dir = '';
+
+	/**
+	 * The directory path of /includes/customizations/
+	 *
+	 * @since 2.0.0
+	 * @var string $path_customizations_dir The path for the customizations folder.
+	 */
+	public string $path_customizations_dir = '';
+
+	/**
+	 * The directory path of /includes/walkers/
+	 *
+	 * @since 2.0.0
+	 * @var string $path_walkers_dir The path for the walkers folder.
+	 */
+	public string $path_walkers_dir = '';
+
+	/**
 	 * The url location of the source.
 	 *
 	 * @since 2.0.0
@@ -191,6 +215,14 @@ class Deodar {
 	private string $transient_styles_blocks = 'deodar_styles_blocks';
 
 	/**
+	 * The transient name for the extension paths.
+	 *
+	 * @since 2.1.0
+	 * @var string $transient_extensions The transient name for the extension paths.
+	 */
+	private string $transient_extensions = 'deodar_paths_extensions';
+
+	/**
 	 * The cached ACF block paths.
 	 *
 	 * @since 2.0.0
@@ -213,6 +245,14 @@ class Deodar {
 	 * @var null|array[] $paths_customizations The cached customizations.
 	 */
 	private null|array $paths_customizations = null;
+
+	/**
+	 * The cached extension paths
+	 *
+	 * @since 2.1.0
+	 * @var null|array[] $paths_extensions The cached extensions.
+	 */
+	private null|array $paths_extensions = null;
 
 	/**
 	 * The cached block styles
@@ -245,7 +285,7 @@ class Deodar {
 		add_filter( 'acf/json/save_paths', array( $this, 'save_paths' ), 10, 2 );
 		add_filter( 'acf/settings/load_json', array( $this, 'load_json' ) );
 		add_filter( 'get_block_type_variations', array( $this, 'get_block_type_variations' ), 10, 2 );
-
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_action( 'customize_register', array( $this, 'customize_register' ) );
@@ -371,11 +411,34 @@ class Deodar {
 	 */
 	public function admin_enqueue_scripts() {
 		foreach ( $this->styles as $style ) {
-			$style->enqueue( $this->url_base, false );
+			$style->enqueue( $this->url_base, Deodar_End::BACK );
 		}
 
 		foreach ( $this->scripts as $script ) {
-			$script->enqueue( $this->url_base, false );
+			$script->enqueue( $this->url_base, Deodar_End::BACK );
+		}
+	}
+
+	/**
+	 * Enqueue_block_editor_assets function.
+	 *
+	 * Called at the `enqueue_block_editor_assets` hook.
+	 *
+	 * @since 2.1.0
+	 * @return void
+	 */
+	public function enqueue_block_editor_assets() {
+
+		if ( false === is_admin() ) {
+			return;
+		}
+
+		foreach ( $this->styles as $style ) {
+			$style->enqueue( $this->url_base, Deodar_End::EDITOR );
+		}
+
+		foreach ( $this->scripts as $script ) {
+			$script->enqueue( $this->url_base, Deodar_End::EDITOR );
 		}
 	}
 
@@ -408,6 +471,22 @@ class Deodar {
 				$this->path_blocks_dir,
 				$this->url_blocks_dir
 			);
+		}
+
+		foreach ( $this->get_extensions() as $extension ) {
+			$result = _deodar_safe_include( $extension['path'] );
+
+			if ( true === $result ) {
+				$class_name = $extension['class_name'];
+
+				if ( class_exists( $class_name ) ) {
+					$loaded = new $class_name();
+
+					if ( method_exists( $loaded, 'register' ) ) {
+						$loaded->register();
+					}
+				}
+			}
 		}
 	}
 
@@ -489,11 +568,11 @@ class Deodar {
 	 */
 	public function wp_enqueue_scripts() {
 		foreach ( $this->styles as $style ) {
-			$style->enqueue( $this->url_base, true );
+			$style->enqueue( $this->url_base, Deodar_End::FRONT );
 		}
 
 		foreach ( $this->scripts as $script ) {
-			$script->enqueue( $this->url_base, true );
+			$script->enqueue( $this->url_base, Deodar_End::FRONT );
 		}
 	}
 
@@ -551,13 +630,16 @@ class Deodar {
 		$this->transient_customizations = sprintf( 'deodar_paths_customizations_%s', $this->name );
 		$this->transient_styles_blocks  = sprintf( 'deodar_styles_blocks_%s', $this->name );
 
-		$this->path_blocks_dir        = path_join( $this->path_base, 'blocks' );
-		$this->path_acf_blocks_dir    = path_join( $this->path_blocks_dir, 'acf' );
-		$this->path_includes_dir      = path_join( $this->path_base, 'includes' );
-		$this->path_field_groups_dir  = path_join( $this->path_includes_dir, 'field-groups' );
-		$this->path_post_types_dir    = path_join( $this->path_includes_dir, 'post-types' );
-		$this->path_taxonomies_dir    = path_join( $this->path_includes_dir, 'taxonomies' );
-		$this->path_options_pages_dir = path_join( $this->path_includes_dir, 'options-pages' );
+		$this->path_blocks_dir         = path_join( $this->path_base, 'blocks' );
+		$this->path_acf_blocks_dir     = path_join( $this->path_blocks_dir, 'acf' );
+		$this->path_includes_dir       = path_join( $this->path_base, 'includes' );
+		$this->path_field_groups_dir   = path_join( $this->path_includes_dir, 'field-groups' );
+		$this->path_post_types_dir     = path_join( $this->path_includes_dir, 'post-types' );
+		$this->path_taxonomies_dir     = path_join( $this->path_includes_dir, 'taxonomies' );
+		$this->path_options_pages_dir  = path_join( $this->path_includes_dir, 'options-pages' );
+		$this->path_extensions_dir     = path_join( $this->path_includes_dir, 'extensions' );
+		$this->path_customizations_dir = path_join( $this->path_includes_dir, 'customizations' );
+		$this->path_walkers_dir        = path_join( $this->path_includes_dir, 'walkers' );
 
 		$this->url_blocks_dir = sprintf( '%s/blocks', $this->url_base );
 
@@ -702,8 +784,6 @@ class Deodar {
 			return $this->paths_customizations;
 		}
 
-		$customizations_dir_path = path_join( $this->path_base, path_join( 'includes', 'customizations' ) );
-
 		if ( true === $this->production ) {
 			$customizations = get_transient( $this->transient_customizations );
 
@@ -713,12 +793,12 @@ class Deodar {
 			}
 		}
 
-		if ( false === is_dir( $customizations_dir_path ) ) {
+		if ( false === is_dir( $this->path_customizations_dir ) ) {
 			$this->paths_customizations = array();
 			return $this->paths_customizations;
 		}
 
-		$includes = _deodar_scan_for_files( $customizations_dir_path );
+		$includes = _deodar_scan_for_files( $this->path_customizations_dir );
 		$loaded   = array();
 
 		foreach ( $includes as [$name, $path] ) {
@@ -736,6 +816,54 @@ class Deodar {
 
 		$this->paths_customizations = $loaded;
 		return $this->paths_customizations;
+	}
+
+	/**
+	 * Get_extensions function.
+	 *
+	 * Returns all of the extensions within the includes/extensions folder.
+	 *
+	 * @since 2.1.0
+	 * @return array The loaded extensions.
+	 */
+	private function get_extensions(): array {
+		if ( true === isset( $this->paths_extensions ) ) {
+			return $this->paths_extensions;
+		}
+
+		if ( true === $this->production ) {
+			$paths_extensions = get_transient( $this->transient_extensions );
+
+			if ( false !== $paths_extensions ) {
+				$this->paths_extensions = $paths_extensions;
+				return $this->paths_extensions;
+			}
+		}
+
+		if ( false === is_dir( $this->path_extensions_dir ) ) {
+			$this->paths_extensions = array();
+			return $this->paths_extensions;
+		}
+
+		$includes = _deodar_scan_for_files( $this->path_extensions_dir );
+		$loaded   = array();
+
+		foreach ( $includes as [$name, $path] ) {
+			if ( preg_match( '/^class-([A-Za-z0-9-]+)\.extension\.php$/', $name, $matches ) ) {
+
+				$loaded[] = array(
+					'path'       => $path,
+					'class_name' => _deodar_classify( $matches[1] ) . '_Extension',
+				);
+			}
+		}
+
+		if ( true === $this->production ) {
+			set_transient( $this->transient_extensions, $loaded, DAY_IN_SECONDS );
+		}
+
+		$this->paths_extensions = $loaded;
+		return $this->paths_extensions;
 	}
 
 	/**
@@ -760,16 +888,13 @@ class Deodar {
 			}
 		}
 
-		$walkers_dir_path = path_join( $this->path_includes_dir, 'walkers' );
-
-		if ( false === is_dir( $walkers_dir_path ) ) {
+		if ( false === is_dir( $this->path_walkers_dir ) ) {
 			$this->paths_walkers = array();
 			return $this->paths_walkers;
 		}
 
-		$includes = _deodar_scan_for_files( $walkers_dir_path );
-
-		$valid = array();
+		$includes = _deodar_scan_for_files( $this->path_walkers_dir );
+		$valid    = array();
 
 		foreach ( $includes as [$name, $path] ) {
 			if ( preg_match( '/^class-([A-Za-z0-9-]+)\.walker\.php$/', $name, $matches ) ) {

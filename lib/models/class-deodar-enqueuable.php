@@ -88,6 +88,14 @@ abstract class Deodar_Enqueuable {
 	private bool $backend = false;
 
 	/**
+	 * Whether or not the enqueuable needs to be loaded on the editor
+	 *
+	 * @since 2.1.0
+	 * @var bool $editor Should the enqueuable be loaded on the editor.
+	 */
+	private bool $editor = false;
+
+	/**
 	 * Deodar Enqueuable constructor.
 	 *
 	 * @since 2.0.0
@@ -166,6 +174,13 @@ abstract class Deodar_Enqueuable {
 			}
 			$this->backend = $data['backend'];
 		}
+
+		if ( true === isset( $data['editor'] ) ) {
+			if ( false === is_bool( $data['editor'] ) ) {
+				throw new InvalidArgumentException( '"editor" must be a bool or removed.' );
+			}
+			$this->editor = $data['editor'];
+		}
 	}
 
 	/**
@@ -174,11 +189,11 @@ abstract class Deodar_Enqueuable {
 	 * Meant to call one of the enqueue functions.
 	 *
 	 * @since 2.0.0
-	 * @param string $url_root The root url in the event the enqueuable file has a relative path.
-	 * @param bool   $end Which end is being loaded, frontend is true, backend is false.
+	 * @param string     $url_root The root url in the event the enqueuable file has a relative path.
+	 * @param Deodar_End $end Which end is being loaded, frontend is true, backend is false.
 	 * @return void
 	 */
-	abstract public function enqueue( string $url_root, bool $end ): void;
+	abstract public function enqueue( string $url_root, Deodar_End $end ): void;
 
 	/**
 	 * The get_url function.
@@ -205,17 +220,27 @@ abstract class Deodar_Enqueuable {
 	 * If the template set, determine's if the script should enqueue.
 	 *
 	 * @since 2.0.0
-	 * @param bool $end Which end is being loaded, frontend is true, backend is false.
+	 * @param Deodar_End $end Which end is being loaded, frontend is true, backend is false.
 	 * @return bool should the script enqueue.
 	 */
-	public function should_enqueue( bool $end ): bool {
+	public function should_enqueue( Deodar_End $end ): bool {
 
-		if ( true === $end && false === $this->frontend ) {
-			return false;
-		}
-
-		if ( false === $end && false === $this->backend ) {
-			return false;
+		switch ( $end ) {
+			case Deodar_End::FRONT:
+				if ( false === $this->frontend ) {
+					return false;
+				}
+				break;
+			case Deodar_End::BACK:
+				if ( false === $this->backend ) {
+					return false;
+				}
+				break;
+			case Deodar_End::EDITOR:
+				if ( false === $this->editor ) {
+					return false;
+				}
+				break;
 		}
 
 		if ( true === isset( $this->template ) ) {
